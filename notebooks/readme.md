@@ -11,5 +11,4 @@ Try it yourself. If you are *brave*, try to look at the code and change it. Expl
 - Non-deterministic Cell Excitability and Channel noise [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Stochastic_HH.ipynb)
 - Short-term synaptic depression [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Tsodyks_Markram.ipynb)
 
-
 Work in progress here! Come back soon.
