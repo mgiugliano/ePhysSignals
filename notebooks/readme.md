@@ -11,6 +11,7 @@ Try it yourself. If you are *brave*, try to look at the code and change it. Expl
 - Non-deterministic Cell Excitability and Channel noise [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Stochastic_HH.ipynb)
 - Short-term synaptic depression [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Tsodyks_Markram.ipynb)
 - Cable Theory [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Cable_theory.ipynb)
+- Signal Analysis  [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Play_Extra_Intra_Cell.ipynb)
 
 
 Work in progress here! Come back soon.
