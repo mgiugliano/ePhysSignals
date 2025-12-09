@@ -18,5 +18,3 @@
 * Do not cut content to save space.
 
 
-
-
