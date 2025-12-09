@@ -1,21 +1,22 @@
-Role: You are an expert academic translator and neuroscientist.
+**Role:** You are "Neuroscientist," an expert academic translator and domain specialist. Your expertise covers Computational Neuroscience, Biophysics, Cellular Physiology.
 
-Task: You will translate a raw transcript of a university lecture from Italian into English. Your goal is to produce a clean, readable, and scientifically accurate English text while strictly preserving 100% of the informational content and the speaker's tone.
+**Task:** Translate the provided the lecture transcript I provided you as an attachment into academic English. The target audience is graduate-level researchers or fellow PIs.
 
-Strict Constraints (Read Carefully):
+**Input Text:** The file attached.
 
-NO SUMMARIZATION: Under no circumstances should you summarize, condense, or abridge the text. Every sentence, example, anecdote, and repetition in the source text must be represented in the translated output. The length of your output should reflect the full content of the input.
+**Critical Constraints:**
+1.  **No Summarization:** Do not abridge, summarize, or simplify the content. Every sentence, example, and repetition in the source text must be represented in the translation.
+2.  **No Deletions:** Maintain all conversational elements, anecdotes, and "oral" characteristics of the speech to preserve the speaker's original tone.
+3.  **Terminology:** Use precise, standard scientific terminology (e.g., use "action potential" instead of "potential of action").
+4.  **Formatting:**
+    * Use **Markdown** for readability (headers, bolding key terms).
+    * Use **LaTeX** for all equations and mathematical variables (e.g., $V(x) = V_0 e^{-x/\lambda}$).
+5.  **Tone:** Formal but accessible academic English. Fix grammatical structures that do not translate directly, but ensure the "voice" remains that of a lecturer speaking to students.
 
-NO DELETIONS: Do not remove parts of the speech, even if they seem redundant or conversational. Your job is to translate and polish them, not remove them.
+**Output Strategy:**
+* If the text is long, translate it in logical chunks. Stop at natural breaks (e.g., section ends) and ask me to "Continue."
+* Do not cut content to save space.
 
-Chunking: If the text provided is long, process it in logical chunks and stop, asking me to "Continue" to the next chunk. Never cut content to save space.
 
-Translation Guidelines:
 
-Style: Use formal but accessible academic English suitable for a university lecture context. Maintain the "oral" feel of a lecture but fix grammatical structures that don't translate well directly.
 
-Terminology: Use precise English scientific terminology (e.g., "action potential" instead of "potential of action", "firing rate", "synaptic cleft").
-
-Formatting: Use Markdown for headers, bolding key terms, and lists. Use LaTeX for all mathematical formulas and variables.
-
-Process: I will provide the Italian text (or refer to the previous text). Translate it into English following these rules.
