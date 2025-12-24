@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neurophysiology Quiz</title>
+    <title>Neurophysiology Quiz (LaTeX Enabled)</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -251,16 +258,12 @@
                 const lines = block.split('\n');
                 
                 // 1. Detect Header Change
-                // If a block starts with ###, it's likely just a header block, update state and skip
                 if (lines[0].startsWith('###')) {
                     currentSection = lines[0].replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
-                    // If the block *only* contains the header, return. 
-                    // If it contains a header AND a question, we process the question.
                     if (lines.length === 1) return;
                 }
 
                 // 2. Extract Question Text
-                // Looking for **Bold Text** at the start
                 let questionText = "";
                 let options = [];
                 let reasoning = "";
@@ -271,7 +274,6 @@
                     if (!line) return;
 
                     if (line.startsWith('###')) {
-                        // Update section if found mid-block
                         currentSection = line.replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
                     } 
                     else if (line.startsWith('>')) {
@@ -284,28 +286,23 @@
                         // Option
                         isCollectingReasoning = false;
                         const isCorrect = line.includes('[x]');
-                        // Remove the checkbox marker to get clean text
                         const optText = line.replace(/^\*\s*\[[ x]\]\s*/, '');
                         options.push({ text: optText, correct: isCorrect });
                     } 
                     else {
                         // Question Text part
                         if (!isCollectingReasoning) {
-                            // If it's the specific question line (usually bolded)
                             if (line.startsWith('**') && line.endsWith('**')) {
                                 questionText += line.replace(/\*\*/g, '') + " ";
                             } else if (line.startsWith('**')) {
-                                // Starts bold but might be multi-line
                                 questionText += line.replace(/\*\*/g, '') + " ";
                             } else {
-                                // Just standard text line (append to question)
                                 questionText += line + " ";
                             }
                         }
                     }
                 });
 
-                // Validate: A valid question must have options
                 if (options.length > 0 && questionText.trim().length > 0) {
                     this.questions.push({
                         section: currentSection,
@@ -318,10 +315,8 @@
         }
 
         shuffleQuestions() {
-            // Create an array of indices [0, 1, 2, ... n]
             this.shuffledIndices = Array.from({length: this.questions.length}, (_, i) => i);
             
-            // Fisher-Yates Shuffle
             for (let i = this.shuffledIndices.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [this.shuffledIndices[i], this.shuffledIndices[j]] = [this.shuffledIndices[j], this.shuffledIndices[i]];
@@ -333,7 +328,7 @@
             if (this.questions.length === 0) return;
 
             if (e.code === 'Space') {
-                e.preventDefault(); // Prevent scrolling
+                e.preventDefault(); 
                 if (!this.isRevealed) {
                     this.reveal();
                 }
@@ -350,23 +345,22 @@
         }
 
         nextQuestion() {
-            // Increment index, loop back if at end (or reshuffle could happen here)
             this.currentIndex = (this.currentIndex + 1) % this.questions.length;
             this.isRevealed = false;
             this.ui.card.classList.remove('revealed');
             this.renderQuestion();
         }
 
+        /**
+         * Renders the question and calls KaTeX to render math.
+         */
         renderQuestion() {
-            // Get the question based on the shuffled index
             const actualIndex = this.shuffledIndices[this.currentIndex];
             const q = this.questions[actualIndex];
 
-            // Update UI Counters
             this.ui.section.textContent = q.section;
             this.ui.counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
 
-            // Build HTML
             let html = `
                 <div class="section-tag">${q.section}</div>
                 <div class="question-text">${q.text}</div>
@@ -383,7 +377,6 @@
 
             html += `</div>`; // Close grid
 
-            // Add Reasoning (Hidden by default via CSS)
             if (q.reasoning) {
                 html += `
                     <div class="reasoning">
@@ -395,6 +388,20 @@
             }
 
             this.ui.card.innerHTML = html;
+
+            // --- TRIGGER MATH RENDERING ---
+            // We use the KaTeX auto-render extension to find $...$ delimiters
+            if (window.renderMathInElement) {
+                renderMathInElement(this.ui.card, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError : false
+                });
+            }
         }
 
         showError(msg) {
@@ -410,7 +417,13 @@
         }
     }
 
-    new QuizApp();
+    // Wait for the window to load (and libraries to load) before starting
+    window.addEventListener('load', () => {
+        new QuizApp();
+    });
 </script>
 </body>
 </html>
+
+
+
