@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurophysiology Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent: #3b82f6;
+            --success-bg: #dcfce7;
+            --success-border: #86efac;
+            --success-text: #166534;
+            --neutral-border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Card Design */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 40px;
+            border: 1px solid var(--neutral-border);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .section-tag {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 16px 20px;
+            border: 2px solid var(--neutral-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: #fff;
+            color: var(--text-primary);
+        }
+
+        /* Revealed States */
+        .revealed .option.correct {
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success-text);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .revealed .option.correct::after {
+            content: "✓";
+            float: right;
+            font-weight: bold;
+        }
+
+        .revealed .option:not(.correct) {
+            opacity: 0.5;
+            background-color: #f9fafb;
+        }
+
+        /* Reasoning Box */
+        .reasoning {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #eff6ff;
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            color: #1e40af;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none; /* Hidden by default */
+        }
+
+        .revealed .reasoning {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Controls / Instructions */
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .key-hint {
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--text-primary);
+            box-shadow: 0 2px 0 #cbd5e1;
+        }
+
+        /* Error / Loading States */
+        .message-screen {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .error { color: #ef4444; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="status-bar">
+            <span id="section-display">Loading...</span>
+            <span id="counter-display">0 / 0</span>
+        </div>
+
+        <div class="card" id="quiz-card">
+            <div class="message-screen">
+                <h2>Loading Quiz Data...</h2>
+                <p>Fetching <code>questions_new.md</code></p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <span>Press <span class="key-hint">Space</span> to Reveal Answer</span>
+            <span>Press <span class="key-hint">Enter</span> or <span class="key-hint">→</span> for Next Question</span>
+        </div>
+    </div>
+
+<script>
+    class QuizApp {
+        constructor() {
+            this.questions = [];
+            this.shuffledIndices = [];
+            this.currentIndex = 0; // Index within the shuffled array
+            this.isRevealed = false;
+            
+            this.ui = {
+                card: document.getElementById('quiz-card'),
+                section: document.getElementById('section-display'),
+                counter: document.getElementById('counter-display')
+            };
+
+            // Bind inputs
+            document.addEventListener('keydown', this.handleInput.bind(this));
+            
+            // Start
+            this.init();
+        }
+
+        async init() {
+            try {
+                // FETCH THE FILE FROM THE SAME DIRECTORY
+                const response = await fetch('./questions_new.md');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}. Ensure you are running this via a local server (http://localhost), not file://`);
+                }
+
+                const markdown = await response.text();
+                this.parseMarkdown(markdown);
+                
+                if (this.questions.length > 0) {
+                    this.shuffleQuestions();
+                    this.renderQuestion();
+                } else {
+                    this.showError("No questions found in the Markdown file.");
+                }
+
+            } catch (err) {
+                this.showError(err.message);
+            }
+        }
+
+        parseMarkdown(text) {
+            // Split by the horizontal rule used in your file
+            // Regex handles "-----", "---", or just visual separators
+            const rawBlocks = text.split(/\n-{3,}\n/);
+            
+            let currentSection = "General";
+
+            rawBlocks.forEach(block => {
+                block = block.trim();
+                if (!block) return;
+
+                const lines = block.split('\n');
+                
+                // 1. Detect Header Change
+                // If a block starts with ###, it's likely just a header block, update state and skip
+                if (lines[0].startsWith('###')) {
+                    currentSection = lines[0].replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
+                    // If the block *only* contains the header, return. 
+                    // If it contains a header AND a question, we process the question.
+                    if (lines.length === 1) return;
+                }
+
+                // 2. Extract Question Text
+                // Looking for **Bold Text** at the start
+                let questionText = "";
+                let options = [];
+                let reasoning = "";
+                let isCollectingReasoning = false;
+
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    if (line.startsWith('###')) {
+                        // Update section if found mid-block
+                        currentSection = line.replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
+                    } 
+                    else if (line.startsWith('>')) {
+                        // Reasoning block
+                        isCollectingReasoning = true;
+                        let cleanLine = line.replace(/^>\s*/, '').replace(/\*\*(Ragionamento|Reasoning|Hint):?\*\*/i, '');
+                        reasoning += cleanLine + " ";
+                    } 
+                    else if (line.startsWith('* [')) {
+                        // Option
+                        isCollectingReasoning = false;
+                        const isCorrect = line.includes('[x]');
+                        // Remove the checkbox marker to get clean text
+                        const optText = line.replace(/^\*\s*\[[ x]\]\s*/, '');
+                        options.push({ text: optText, correct: isCorrect });
+                    } 
+                    else {
+                        // Question Text part
+                        if (!isCollectingReasoning) {
+                            // If it's the specific question line (usually bolded)
+                            if (line.startsWith('**') && line.endsWith('**')) {
+                                questionText += line.replace(/\*\*/g, '') + " ";
+                            } else if (line.startsWith('**')) {
+                                // Starts bold but might be multi-line
+                                questionText += line.replace(/\*\*/g, '') + " ";
+                            } else {
+                                // Just standard text line (append to question)
+                                questionText += line + " ";
+                            }
+                        }
+                    }
+                });
+
+                // Validate: A valid question must have options
+                if (options.length > 0 && questionText.trim().length > 0) {
+                    this.questions.push({
+                        section: currentSection,
+                        text: questionText.trim(),
+                        options: options,
+                        reasoning: reasoning.trim()
+                    });
+                }
+            });
+        }
+
+        shuffleQuestions() {
+            // Create an array of indices [0, 1, 2, ... n]
+            this.shuffledIndices = Array.from({length: this.questions.length}, (_, i) => i);
+            
+            // Fisher-Yates Shuffle
+            for (let i = this.shuffledIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.shuffledIndices[i], this.shuffledIndices[j]] = [this.shuffledIndices[j], this.shuffledIndices[i]];
+            }
+            this.currentIndex = 0;
+        }
+
+        handleInput(e) {
+            if (this.questions.length === 0) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault(); // Prevent scrolling
+                if (!this.isRevealed) {
+                    this.reveal();
+                }
+            } 
+            else if (e.code === 'ArrowRight' || e.code === 'Enter') {
+                e.preventDefault();
+                this.nextQuestion();
+            }
+        }
+
+        reveal() {
+            this.isRevealed = true;
+            this.ui.card.classList.add('revealed');
+        }
+
+        nextQuestion() {
+            // Increment index, loop back if at end (or reshuffle could happen here)
+            this.currentIndex = (this.currentIndex + 1) % this.questions.length;
+            this.isRevealed = false;
+            this.ui.card.classList.remove('revealed');
+            this.renderQuestion();
+        }
+
+        renderQuestion() {
+            // Get the question based on the shuffled index
+            const actualIndex = this.shuffledIndices[this.currentIndex];
+            const q = this.questions[actualIndex];
+
+            // Update UI Counters
+            this.ui.section.textContent = q.section;
+            this.ui.counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
+
+            // Build HTML
+            let html = `
+                <div class="section-tag">${q.section}</div>
+                <div class="question-text">${q.text}</div>
+                <div class="options-grid">
+            `;
+
+            q.options.forEach(opt => {
+                html += `
+                    <div class="option ${opt.correct ? 'correct' : ''}">
+                        ${opt.text}
+                    </div>
+                `;
+            });
+
+            html += `</div>`; // Close grid
+
+            // Add Reasoning (Hidden by default via CSS)
+            if (q.reasoning) {
+                html += `
+                    <div class="reasoning">
+                        <strong>Ragionamento:</strong> ${q.reasoning}
+                    </div>
+                `;
+            } else {
+                html += `<div class="reasoning"><em>Nessun ragionamento fornito.</em></div>`;
+            }
+
+            this.ui.card.innerHTML = html;
+        }
+
+        showError(msg) {
+            this.ui.card.innerHTML = `
+                <div class="message-screen error">
+                    <h2>Error</h2>
+                    <p>${msg}</p>
+                    <p style="font-size:0.8rem; color: #666; margin-top:20px;">
+                        Note: Because this app fetches an external file, browser security requires it to be hosted on a server (Localhost or Web), not opened as a file.
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    new QuizApp();
+</script>
+</body>
+</html>
