@@ -2,107 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neurophysiology Quiz (LaTeX Enabled)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NeuroFlash Mobile</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
-    
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
-    
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
 
     <style>
         :root {
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
-            --text-primary: #1e293b;
+            --text-primary: #0f172a;
             --text-secondary: #64748b;
-            --accent: #3b82f6;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
             --success-bg: #dcfce7;
             --success-border: #86efac;
             --success-text: #166534;
             --neutral-border: #e2e8f0;
+            --btn-height: 56px;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
+            padding-bottom: 90px; /* Space for sticky button */
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 700px;
+            margin: auto;
         }
 
-        /* Status Bar */
-        .status-bar {
+        /* Header / Status */
+        .header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            font-weight: 500;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+        
+        .badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Card Design */
+        .counter {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Card */
         .card {
             background: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 40px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
             border: 1px solid var(--neutral-border);
-            min-height: 400px;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
         }
 
-        .section-tag {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #f1f5f9;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            font-weight: 700;
-        }
-
         .question-text {
-            font-size: 1.25rem;
-            line-height: 1.6;
-            margin-top: 20px;
-            margin-bottom: 30px;
+            font-size: 1.15rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         /* Options */
         .options-grid {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .option {
-            padding: 16px 20px;
+            padding: 14px 16px;
             border: 2px solid var(--neutral-border);
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1rem;
-            transition: all 0.2s ease;
             background: #fff;
             color: var(--text-primary);
+            line-height: 1.4;
+            transition: transform 0.1s;
+        }
+
+        .option:active {
+            background-color: #f8fafc;
+            transform: scale(0.99);
         }
 
         /* Revealed States */
@@ -110,164 +121,202 @@
             background-color: var(--success-bg);
             border-color: var(--success-border);
             color: var(--success-text);
-            font-weight: 500;
-            position: relative;
+            font-weight: 600;
         }
         
         .revealed .option.correct::after {
             content: "✓";
             float: right;
-            font-weight: bold;
         }
 
         .revealed .option:not(.correct) {
-            opacity: 0.5;
-            background-color: #f9fafb;
+            opacity: 0.6;
+            background-color: #f1f5f9;
+            border-color: transparent;
         }
 
-        /* Reasoning Box */
+        /* Reasoning */
         .reasoning {
-            margin-top: 25px;
-            padding: 20px;
+            margin-top: 20px;
+            padding: 16px;
             background-color: #eff6ff;
-            border-left: 5px solid var(--accent);
-            border-radius: 6px;
+            border-radius: 8px;
             color: #1e40af;
             font-size: 0.95rem;
-            line-height: 1.6;
-            display: none; /* Hidden by default */
+            line-height: 1.5;
+            display: none;
+            border: 1px solid #dbeafe;
         }
 
         .revealed .reasoning {
             display: block;
-            animation: slideDown 0.3s ease-out;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Controls / Instructions */
-        .controls {
-            margin-top: 30px;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+        /* Mobile Controls */
+        .action-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 700px;
+            z-index: 100;
             display: flex;
-            gap: 20px;
+            gap: 10px;
+        }
+
+        .btn {
+            height: var(--btn-height);
+            border-radius: 14px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
 
-        .key-hint {
-            background: #e2e8f0;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: bold;
-            color: var(--text-primary);
-            box-shadow: 0 2px 0 #cbd5e1;
+        .btn:active {
+            transform: scale(0.96);
         }
 
-        /* Error / Loading States */
-        .message-screen {
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:active, .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* State: Next Button Style */
+        .btn.next-mode {
+            background-color: var(--text-primary);
+            color: white;
+        }
+
+        /* Error/Loading */
+        .status-msg {
             text-align: center;
             color: var(--text-secondary);
+            padding: 20px;
         }
-        .error { color: #ef4444; }
+
+        /* Media Queries for Desktop */
+        @media (min-width: 768px) {
+            body { padding: 40px; padding-bottom: 40px; }
+            .action-bar {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 30px;
+            }
+            .card { padding: 40px; min-height: 400px; }
+            .question-text { font-size: 1.35rem; }
+        }
 
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="status-bar">
-            <span id="section-display">Loading...</span>
-            <span id="counter-display">0 / 0</span>
+        <div class="header">
+            <div id="section-badge" class="badge">Loading...</div>
+            <div id="counter" class="counter">0 / 0</div>
         </div>
 
         <div class="card" id="quiz-card">
-            <div class="message-screen">
-                <h2>Loading Quiz Data...</h2>
-                <p>Fetching <code>questions_new.md</code></p>
+            <div class="status-msg">
+                <h3>Initializing...</h3>
+                <p>Ensuring KaTeX resources are ready.</p>
             </div>
-        </div>
-
-        <div class="controls">
-            <span>Press <span class="key-hint">Space</span> to Reveal Answer</span>
-            <span>Press <span class="key-hint">Enter</span> or <span class="key-hint">→</span> for Next Question</span>
         </div>
     </div>
 
+    <div class="action-bar">
+        <button id="main-btn" class="btn btn-primary">Reveal Answer</button>
+    </div>
+
 <script>
-    class QuizApp {
+    class MobileQuizApp {
         constructor() {
             this.questions = [];
             this.shuffledIndices = [];
-            this.currentIndex = 0; // Index within the shuffled array
+            this.currentIndex = 0;
             this.isRevealed = false;
             
             this.ui = {
                 card: document.getElementById('quiz-card'),
-                section: document.getElementById('section-display'),
-                counter: document.getElementById('counter-display')
+                sectionBadge: document.getElementById('section-badge'),
+                counter: document.getElementById('counter'),
+                mainBtn: document.getElementById('main-btn')
             };
 
-            // Bind inputs
-            document.addEventListener('keydown', this.handleInput.bind(this));
-            
-            // Start
+            this.bindEvents();
             this.init();
+        }
+
+        bindEvents() {
+            // Touch/Click
+            this.ui.mainBtn.addEventListener('click', () => this.handleMainAction());
+            
+            // Keyboard Fallback
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    this.handleMainAction();
+                }
+            });
         }
 
         async init() {
             try {
-                // FETCH THE FILE FROM THE SAME DIRECTORY
+                // Fetch MD file from same directory
                 const response = await fetch('./questions_new.md');
+                if (!response.ok) throw new Error("Could not load questions file.");
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}. Ensure you are running this via a local server (http://localhost), not file://`);
-                }
-
-                const markdown = await response.text();
-                this.parseMarkdown(markdown);
+                const text = await response.text();
+                this.parseMarkdown(text);
                 
                 if (this.questions.length > 0) {
                     this.shuffleQuestions();
                     this.renderQuestion();
                 } else {
-                    this.showError("No questions found in the Markdown file.");
+                    this.renderError("No questions found.");
                 }
-
             } catch (err) {
-                this.showError(err.message);
+                this.renderError(`Start local server to run.<br><small>${err.message}</small>`);
             }
         }
 
         parseMarkdown(text) {
-            // Split by the horizontal rule used in your file
-            // Regex handles "-----", "---", or just visual separators
             const rawBlocks = text.split(/\n-{3,}\n/);
-            
             let currentSection = "General";
 
             rawBlocks.forEach(block => {
                 block = block.trim();
                 if (!block) return;
-
-                const lines = block.split('\n');
                 
-                // 1. Detect Header Change
+                const lines = block.split('\n');
+
+                // Header Detection
                 if (lines[0].startsWith('###')) {
                     currentSection = lines[0].replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
                     if (lines.length === 1) return;
                 }
 
-                // 2. Extract Question Text
-                let questionText = "";
-                let options = [];
-                let reasoning = "";
-                let isCollectingReasoning = false;
+                // Question Parsing
+                let qText = "", options = [], reasoning = "", isReasoning = false;
 
                 lines.forEach(line => {
                     line = line.trim();
@@ -275,38 +324,26 @@
 
                     if (line.startsWith('###')) {
                         currentSection = line.replace(/#+\s*/, '').replace(/\*\*/g, '').trim();
-                    } 
-                    else if (line.startsWith('>')) {
-                        // Reasoning block
-                        isCollectingReasoning = true;
-                        let cleanLine = line.replace(/^>\s*/, '').replace(/\*\*(Ragionamento|Reasoning|Hint):?\*\*/i, '');
-                        reasoning += cleanLine + " ";
-                    } 
-                    else if (line.startsWith('* [')) {
-                        // Option
-                        isCollectingReasoning = false;
+                    } else if (line.startsWith('>')) {
+                        isReasoning = true;
+                        reasoning += line.replace(/^>\s*/, '').replace(/\*\*(Ragionamento|Reasoning|Hint):?\*\*/i, '') + " ";
+                    } else if (line.startsWith('* [')) {
+                        isReasoning = false;
                         const isCorrect = line.includes('[x]');
-                        const optText = line.replace(/^\*\s*\[[ x]\]\s*/, '');
-                        options.push({ text: optText, correct: isCorrect });
-                    } 
-                    else {
-                        // Question Text part
-                        if (!isCollectingReasoning) {
-                            if (line.startsWith('**') && line.endsWith('**')) {
-                                questionText += line.replace(/\*\*/g, '') + " ";
-                            } else if (line.startsWith('**')) {
-                                questionText += line.replace(/\*\*/g, '') + " ";
-                            } else {
-                                questionText += line + " ";
-                            }
+                        const txt = line.replace(/^\*\s*\[[ x]\]\s*/, '');
+                        options.push({ text: txt, correct: isCorrect });
+                    } else {
+                        if (!isReasoning) {
+                            if (line.startsWith('**')) qText += line.replace(/\*\*/g, '') + " ";
+                            else qText += line + " ";
                         }
                     }
                 });
 
-                if (options.length > 0 && questionText.trim().length > 0) {
+                if (options.length > 0 && qText.trim().length > 0) {
                     this.questions.push({
                         section: currentSection,
-                        text: questionText.trim(),
+                        text: qText.trim(),
                         options: options,
                         reasoning: reasoning.trim()
                     });
@@ -316,81 +353,72 @@
 
         shuffleQuestions() {
             this.shuffledIndices = Array.from({length: this.questions.length}, (_, i) => i);
-            
             for (let i = this.shuffledIndices.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [this.shuffledIndices[i], this.shuffledIndices[j]] = [this.shuffledIndices[j], this.shuffledIndices[i]];
             }
-            this.currentIndex = 0;
         }
 
-        handleInput(e) {
+        handleMainAction() {
             if (this.questions.length === 0) return;
 
-            if (e.code === 'Space') {
-                e.preventDefault(); 
-                if (!this.isRevealed) {
-                    this.reveal();
-                }
-            } 
-            else if (e.code === 'ArrowRight' || e.code === 'Enter') {
-                e.preventDefault();
-                this.nextQuestion();
+            if (this.isRevealed) {
+                // Action: Next Question
+                this.currentIndex = (this.currentIndex + 1) % this.questions.length;
+                this.isRevealed = false;
+                this.renderQuestion();
+                
+                // Scroll top on mobile to ensure top of new card is seen
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            } else {
+                // Action: Reveal
+                this.isRevealed = true;
+                this.ui.card.classList.add('revealed');
+                this.updateButtonState();
+                
+                // Optional: Scroll to reasoning if it's long? 
+                // Usually better to let user scroll.
             }
         }
 
-        reveal() {
-            this.isRevealed = true;
-            this.ui.card.classList.add('revealed');
+        updateButtonState() {
+            if (this.isRevealed) {
+                this.ui.mainBtn.textContent = "Next Question →";
+                this.ui.mainBtn.classList.add('next-mode');
+            } else {
+                this.ui.mainBtn.textContent = "Reveal Answer";
+                this.ui.mainBtn.classList.remove('next-mode');
+            }
         }
 
-        nextQuestion() {
-            this.currentIndex = (this.currentIndex + 1) % this.questions.length;
-            this.isRevealed = false;
-            this.ui.card.classList.remove('revealed');
-            this.renderQuestion();
-        }
-
-        /**
-         * Renders the question and calls KaTeX to render math.
-         */
         renderQuestion() {
-            const actualIndex = this.shuffledIndices[this.currentIndex];
-            const q = this.questions[actualIndex];
+            const q = this.questions[this.shuffledIndices[this.currentIndex]];
 
-            this.ui.section.textContent = q.section;
+            // Update Header
+            this.ui.sectionBadge.textContent = q.section;
             this.ui.counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
 
-            let html = `
-                <div class="section-tag">${q.section}</div>
-                <div class="question-text">${q.text}</div>
-                <div class="options-grid">
-            `;
-
+            // Build HTML
+            let html = `<div class="question-text">${q.text}</div>`;
+            
+            // Options
+            html += `<div class="options-grid">`;
             q.options.forEach(opt => {
-                html += `
-                    <div class="option ${opt.correct ? 'correct' : ''}">
-                        ${opt.text}
-                    </div>
-                `;
+                html += `<div class="option ${opt.correct ? 'correct' : ''}">${opt.text}</div>`;
             });
+            html += `</div>`;
 
-            html += `</div>`; // Close grid
-
+            // Reasoning
             if (q.reasoning) {
-                html += `
-                    <div class="reasoning">
-                        <strong>Ragionamento:</strong> ${q.reasoning}
-                    </div>
-                `;
-            } else {
-                html += `<div class="reasoning"><em>Nessun ragionamento fornito.</em></div>`;
+                html += `<div class="reasoning"><strong>Explanation:</strong> ${q.reasoning}</div>`;
             }
 
             this.ui.card.innerHTML = html;
+            this.ui.card.classList.remove('revealed');
+            
+            this.updateButtonState();
 
-            // --- TRIGGER MATH RENDERING ---
-            // We use the KaTeX auto-render extension to find $...$ delimiters
+            // Render Math
             if (window.renderMathInElement) {
                 renderMathInElement(this.ui.card, {
                     delimiters: [
@@ -404,26 +432,15 @@
             }
         }
 
-        showError(msg) {
-            this.ui.card.innerHTML = `
-                <div class="message-screen error">
-                    <h2>Error</h2>
-                    <p>${msg}</p>
-                    <p style="font-size:0.8rem; color: #666; margin-top:20px;">
-                        Note: Because this app fetches an external file, browser security requires it to be hosted on a server (Localhost or Web), not opened as a file.
-                    </p>
-                </div>
-            `;
+        renderError(msg) {
+            this.ui.card.innerHTML = `<div class="status-msg" style="color:#ef4444"><h3>Error</h3><p>${msg}</p></div>`;
         }
     }
 
-    // Wait for the window to load (and libraries to load) before starting
-    window.addEventListener('load', () => {
-        new QuizApp();
-    });
+    // Launch
+    window.addEventListener('load', () => new MobileQuizApp());
 </script>
 </body>
 </html>
-
 
 
