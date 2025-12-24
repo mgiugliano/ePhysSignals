@@ -289,13 +289,23 @@
                 this.parseMarkdown(text);
                 
                 if (this.questions.length > 0) {
-                    this.shuffleQuestions();
+                    this.shuffleQuestions(); // Shuffles the order of questions
                     this.renderQuestion();
                 } else {
                     this.renderError("No questions found.");
                 }
             } catch (err) {
                 this.renderError(`Start local server to run.<br><small>${err.message}</small>`);
+            }
+        }
+
+        /**
+         * Generic Utility: Shuffles an array in place
+         */
+        shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
@@ -341,6 +351,9 @@
                 });
 
                 if (options.length > 0 && qText.trim().length > 0) {
+                    // NEW: Randomize options before saving the question object
+                    this.shuffleArray(options);
+
                     this.questions.push({
                         section: currentSection,
                         text: qText.trim(),
@@ -351,12 +364,10 @@
             });
         }
 
+        // Shuffles the order in which questions appear
         shuffleQuestions() {
             this.shuffledIndices = Array.from({length: this.questions.length}, (_, i) => i);
-            for (let i = this.shuffledIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.shuffledIndices[i], this.shuffledIndices[j]] = [this.shuffledIndices[j], this.shuffledIndices[i]];
-            }
+            this.shuffleArray(this.shuffledIndices);
         }
 
         handleMainAction() {
@@ -375,9 +386,6 @@
                 this.isRevealed = true;
                 this.ui.card.classList.add('revealed');
                 this.updateButtonState();
-                
-                // Optional: Scroll to reasoning if it's long? 
-                // Usually better to let user scroll.
             }
         }
 
@@ -442,5 +450,3 @@
 </script>
 </body>
 </html>
-
-
