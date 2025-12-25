@@ -648,7 +648,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 -----
 
-**Riguardo alle sfide computazionali e il confronto Cervello vs Computer (Part 4 transcript):**
+**Riguardo alle sfide computazionali e il confronto Cervello vs Computer (Part 4):**
 
 * [ ] Il "von Neumann bottleneck" si riferisce alla lentezza dei transistor al silicio.
 * [x] Il collo di bottiglia di von Neumann è dovuto alla separazione fisica tra unità di calcolo (CPU) e memoria, che richiede un continuo trasferimento di dati energeticamente costoso.
@@ -971,14 +971,14 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 -----
 
-### **Blocco 1: Dettagli del Transcript, Curiosità e Sintesi Concettuale (Parte 8)**
+### **Blocco 1: Dettagli, Curiosità e Sintesi Concettuale (Parte 8)**
 
-**Riferendosi ai dettagli biografici e introduttivi del docente (Prof. Michele Giugliano) menzionati nella lezione:**
+**Riferendosi ai dettagli biografici e introduttivi sul docente (Prof. Michele Giugliano):**
 
 * [ ] Il docente ha studiato Bioingegneria in America.
 * [x] Il docente è un ingegnere elettronico di formazione (Genova), con un dottorato in Bioingegneria, e ha lavorato in Svizzera (Berna, Losanna), Belgio (Anversa) e alla SISSA (Trieste) prima di Modena.
 * [ ] Il docente odia il cioccolato.
-* [x] Il docente ha scherzato sul fatto che le sue scelte di carriera (Svizzera, Belgio) fossero guidate dalla ricerca del "miglior cioccolato", citando il cioccolato di Novi Ligure come il suo preferito.
+* [x] Il docente ha scherzato sul fatto che le sue scelte di carriera (Svizzera, Belgio) fossero guidate dalla ricerca del "miglior cioccolato".
 * [ ] La "G" nel nome del docente è silenziosa.
 * [x] Il docente ha specificato che la "G" nel cognome "Giugliano" è ridondante ma importante per trovarlo su Google ed evitare omonimie.
 * [ ] Il docente si aspetta che gli studenti conoscano perfettamente la programmazione in C++.
@@ -986,7 +986,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] Il docente usa Discord per le comunicazioni ufficiali.
 * [x] Il docente ha disabilitato Discord e usa esclusivamente Microsoft Teams per la comunicazione e il "community building" tra studenti.
 
-> **Ragionamento:** Questi dettagli, sebbene aneddotici, verificano l'attenzione dello studente al transcript e stabiliscono il contesto umano e logistico del corso.
+> **Ragionamento:** Questi dettagli, sebbene aneddotici, verificano l'attenzione dello studente durante la lezione e stabiliscono il contesto umano e logistico per il corso.
 
 -----
 
@@ -1141,7 +1141,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] La lettura dei libri consigliati è obbligatoria per superare l'esame con 18.
 * [x] Le letture sono definite "per voi stessi" (selfish study); l'esame verte sui concetti discussi a lezione, ma i libri servono a costruire una competenza professionale solida.
 
-> **Ragionamento:** Verifica l'attenzione ai dettagli sulle fonti. Il docente distingue tra materiale d'esame (lezioni/slide) e materiale per la crescita professionale (libri/paper). Il riferimento al Bignami è specifico della cultura didattica italiana citata nel transcript.
+> **Ragionamento:** Verifica l'attenzione ai dettagli sulle fonti. Il docente distingue tra materiale d'esame (lezioni/slide) e materiale per la crescita professionale (libri/paper). Il riferimento al Bignami è specifico della cultura didattica italiana citata a lezione.
 
 -----
 
@@ -1745,7 +1745,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] La derivata di $\ln(x)$ è $x$.
 * [x] La derivata di $\ln(x)$ è $1/x$. Questo compare quando si integrano flussi inversamente proporzionali alla distanza o in processi di decadimento.
 
-> **Ragionamento:** Un refresher necessario dato il "blocco" del docente menzionato nel transcript. Capire che $\ln(1)=0$ è fondamentale per l'intuizione fisica: se non c'è gradiente ($Ratio=1$), non c'è potenziale. Capire la base $e$ vs $10$ serve per i fattori di conversione ($RT/F \approx 25mV$ vs $58mV$).
+> **Ragionamento:** Un refresher necessario dato il "blocco" del docente menzionato a lezione. Capire che $\ln(1)=0$ è fondamentale per l'intuizione fisica: se non c'è gradiente ($Ratio=1$), non c'è potenziale. Capire la base $e$ vs $10$ serve per i fattori di conversione ($RT/F \approx 25mV$ vs $58mV$).
 
 -----
 
@@ -2579,7 +2579,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] Dimostra che il canale è un enzima che consuma ATP.
 * [x] Dimostra che il canale è una macchina elettromeccanica che usa l'energia del campo elettrico per compiere lavoro conformazionale.
 
-> **Ragionamento:** Senza corrente di gating, il modello HH sarebbe solo fenomenologia matematica. La misura di $I_g$ (anni '70, Armstrong & Bezanilla) confermò fisicamente che "qualcosa di carico si muove dentro la membrana" per aprire la porta.
+> **Ragionamento:** Senza corrente di gating, il modello HH sarebbe solo fenomenologia matematica. La misura di $I_g$ (anni '70, Armstrong & Bezanilla) confermò fisicamente che "qualcosa di carico si muove dentro la membrana" per aprire la porta. Questa domanda NON e' stata discussa durante il corso.
 
 -----
 
@@ -2798,7 +2798,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 -----
 
-**Nell'Equazione del Cavo stazionaria ($\lambda^2 \frac{d^2V}{dx^2} = V$), qual è il significato fisico della "Costante di Spazio" ($\lambda$)?**
+**Nell'equazione del cavo stazionaria ($\lambda^2 \frac{d^2V}{dx^2} = V$), qual è il significato fisico della "Costante di Spazio" ($\lambda$)?**
 
 * [ ] $\lambda$ è la lunghezza totale del neurone.
 * [x] $\lambda$ è la distanza alla quale un segnale di voltaggio stazionario decade al $37\%$ ($1/e$) del suo valore iniziale $V_0$, a causa della fuga di corrente attraverso la membrana. 
@@ -3057,18 +3057,18 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 -----
 
-**Come la Spike-Timing Dependent Plasticity (STDP) raffina la regola di Hebb introducendo la causalità temporale millimetrica?**
+**Come la Spike-Timing Dependent Plasticity (STDP) raffina la regola di Hebb, introducendo la causalità temporale?**
 
 * [ ] Se il neurone PRE spara *dopo* il neurone POST, la sinapsi si rinforza.
 * [x] Se PRE spara *prima* di POST (entro 10-20 ms), la sinapsi viene potenziata (LTP): il cervello interpreta questo come "Pre ha causato Post" (Causalità).
 * [ ] Se PRE spara *dopo* POST, non succede nulla.
 * [x] Se PRE spara *dopo* POST (post-before-pre), la sinapsi viene depressa (LTD): il cervello interpreta che lo spike di Pre è inutile o arrivato troppo tardi per causare l'evento (Anti-causalità o rumore). 
-* [ ] La finestra temporale per la STDP è di secondi.
+* [ ] L'ampliezza della finestra temporale per la STDP è di secondi.
 * [x] La finestra critica è strettissima (decine di millisecondi), sottolineando l'importanza della precisione temporale (Timing Code) rispetto alla semplice frequenza media.
 * [ ] La STDP è simmetrica nel tempo.
-* [x] La curva STDP è asimmetrica e discontinua attorno allo zero ($\Delta t = 0$): un piccolo shift temporale può invertire il segno della plasticità da LTP a LTD.
+* [x] La curva STDP è asimmetrica e discontinua attorno allo zero ($\Delta t = 0$): un piccolo shift temporale può invertire il segno della plasticità e quindi passare da LTP a LTD.
 
-> **Ragionamento:** STDP è Hebb con l'orologio. Non basta "insieme" (correlation), serve "prima" (causation). Se arrivi dopo la festa (spike post-sinaptico), sei inutile $\to$ LTD.
+> **Ragionamento:** STDP è Hebb con l'orologio. Non basta "insieme" (co-relation), serve "prima/dopo" (causation). Se arrivi dopo la festa (spike post-sinaptico), sei inutile $\to$ LTD.
 
 -----
 
@@ -3210,7 +3210,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] Il modello simula la depressione come una riduzione del numero di recettori.
 * [x] Il modello (Tsodyks-Markram) simula la depressione presinaptica basata sulla deplezione di risorse (vescicole): la variabile $x$ (o $R$) decade a ogni spike ($x \to x - ux$) e recupera esponenzialmente tra gli spike.
 * [ ] Il metodo numerico usato per risolvere le equazioni delle frazioni di risorse è Runge-Kutta 45.
-* [x] Il transcript menziona esplicitamente l'uso del **Metodo di Eulero** per integrare le variabili di stato ($R, E, I$) passo dopo passo.
+* [x] A lezione si menziona esplicitamente l'uso del **Metodo di Eulero** per integrare le variabili di stato ($R, E, I$) passo dopo passo.
 * [ ] Il codice mostra che la depressione è istantanea.
 * [x] La depressione è cumulativa durante un treno di impulsi (la risorsa scende a gradini) e richiede un tempo di recupero fisiologico (centinaia di ms) per tornare al 100%.
 
@@ -3444,7 +3444,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 -----
 
-**Riguardo allo studio di Gaute Einevoll citato nel transcript sull'approssimazione "Line Source" vs "Point Source":**
+**Riguardo allo studio di Gaute Einevoll citato per l'approssimazione "Line Source" vs "Point Source":**
 
 * [ ] A distanze grandi (> 500 $\mu m$), è fondamentale usare il modello Line Source.
 * [x] A grandi distanze (Far Field), le isopotenziali generate da una sorgente di linea e da una puntiforme sono indistinguibili (il segmento appare come un punto). L'errore è trascurabile.
