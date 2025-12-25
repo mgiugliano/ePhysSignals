@@ -282,7 +282,7 @@
         async init() {
             try {
                 // Fetch MD file from same directory
-                const response = await fetch('./questions_new.md');
+                const response = await fetch('./questions/questions_new.md');
                 if (!response.ok) throw new Error("Could not load questions file.");
                 
                 const text = await response.text();
