@@ -102,7 +102,7 @@ L'espressione $Var\{n\} = \frac{\overline{x} (1 - \overline{x})}{N_{\text{tot}}}
 
 ### La Dipendenza Funzionale dal Potenziale ($\overline{x}$)
 
-La varianza dipende anche dalla frazione media di canali aperti, $\overline{x} = P_A. Questa funzione $\overline{x}(1 - \overline{x})$ è una parabola con concavità verso il basso, che raggiunge il massimo a $\overline{x} = 0.5$ e si annulla a $\overline{x}=0$ e $\overline{x}=1$.
+La varianza dipende anche dalla frazione media di canali aperti, $\overline{x} = P_A$. Questa funzione $\overline{x}(1 - \overline{x})$ è una parabola con concavità verso il basso, che raggiunge il massimo a $\overline{x} = 0.5$ e si annulla a $\overline{x}=0$ e $\overline{x}=1$.
 
 Poiché $\overline{x}$ (il valore asintotico di $n$) dipende dal potenziale di membrana $V_m$ tramite le curve di attivazione ($\alpha$ e $\beta$ sono voltaggio-dipendenti), ne consegue che **il rumore intrinseco dei canali dipende dallo stato del potenziale di membrana**.
 

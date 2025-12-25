@@ -1,6 +1,12 @@
 # Trascrizioni delle lezioni tenute in aula
 
-**Nota:** i file Markdown possono essere convertiti/esportati in formato Microsoft
+**Nota 1:**  In questo folder trovate due PDF, dove tutti le trascrizioni sono
+state raccolte. Dal momento che, per le prime 12h di lezione il corso e' stato tenuto 
+in lingua inglese, i due PDF sono identici per le prime pagine (i.e. corrispondenti alle
+prime tre lezioni).
+
+
+**Nota 2:** i file Markdown (i.e., suffisso .md) possono essere convertiti/esportati in formato Microsoft
 Word, PDF, HTML, LaTeX, ASCII con il software gratuito Zettlr
 (https://www.zettlr.com/), che incorpora una "distribuzione" di Pandoc
 (https://pandoc.org) e che ne semplifica l'uso all'utente che non ha
@@ -61,10 +67,10 @@ accedere a tale materiale durante il periodo di svolgimento delle lezioni stesse
 (Dommett et al., 2022 - 10.1186/s41239-022-00327-9).
 
 
-Per esperienza personale, tuttavia, il docente ritiene che le trascrizioni
-possano rallentare i processi cognitivi associati con il prendere appunti e con
+Per esperienza accademica personale (di insegnamento), il docente ritiene che le trascrizioni
+possano rallentare i processi cognitivi di uno studente, associati con il prendere appunti e con
 l'acquisizione della capacità di sintetizzare in tempo reale gli elementi
 essenziali di una comunicazione personale (e.g., una lezione), prendendo i
 propri appunti. Il docente è ben contento di sbagliarsi, se questo sia o sarà
-il caso nella vita accademica o professionale dei singoli.
+il caso nella vita accademica o professionale degli studenti.
 
