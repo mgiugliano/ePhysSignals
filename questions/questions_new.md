@@ -234,10 +234,10 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 **Riguardo al futuro della computazione e l'approccio "Organoid Intelligence" (OI) o "Wetware", quali concetti sono stati illustrati?**
 
 * [x] I "mini-cervelli" o organoidi cerebrali sono colture cellulari 3D derivate da cellule staminali (iPSC) che auto-organizzano strutture simili al tessuto neurale.
-* [ ] Gli organoidi sono già coscienti e pongono immediati problemi etici riguardanti i diritti umani.
+* [ ] Gli organoidi usano una notevole quantita' di varichina per la loro produzione e pongono immediati problemi per il global warming.
 * [x] Il progetto "DishBrain" ha dimostrato che una coltura di neuroni su un array di elettrodi può "imparare" a giocare a Pong in un sistema a circuito chiuso (stimolazione come feedback).
 * [x] L'obiettivo a lungo termine è sfruttare l'efficienza energetica e la capacità di apprendimento dei neuroni biologici per eseguire calcoli complessi con un consumo energetico minimo rispetto al silicio.
-* [ ] I neuroni biologici sono molto più veloci dei transistor (GHz) nel commutare segnali.
+* [ ] I neuroni biologici sono molto più veloci dei transistori (GHz) nel commutare segnali.
 * [x] Un limite attuale degli organoidi è la mancanza di vascolarizzazione, che porta a necrosi al centro della struttura per mancanza di ossigeno/nutrienti.
 * [ ] La "biocomputazione" mira a sostituire completamente i computer digitali per compiti come fogli di calcolo e videoscrittura.
 * [x] L'integrazione ibrida prevede un sistema che supporta la vita biologica (nutrienti, temperatura) interfacciato con elettronica per I/O (input/output).
@@ -337,8 +337,8 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 **Riguardo alla logistica del corso e ai canali di comunicazione presentati:**
 
-* [x] Il codice "9PSTK" è stato fornito specificamente per la registrazione della presenza tramite app nella prima lezione.
-* [ ] Gli studenti devono inviare un fax al docente per iscriversi al canale Teams.
+* [x] Il codice per tracciare le presenze è stato fornito specificamente ad ogni lezione per la registrazione della presenza tramite la app istituzionale indicata durante la prima lezione.
+* [ ] Gli studenti non possono accedere al canale Teams, a meno che non abbiano frequentato il corso.
 * [x] Il canale Teams è lo strumento ufficiale per la comunicazione rapida, il Q&A tra pari e con il docente, e per ricevere avvisi.
 * [ ] Le slide delle lezioni sono segrete e vengono mostrate solo in aula.
 * [x] Tutto il materiale (slide, dispense, notebook) è disponibile su un repository GitHub pubblico e sul sito del corso, spesso caricato in anticipo.
@@ -466,7 +466,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [x] I segnali provengono tipicamente dalla corteccia motoria primaria (M1) o premotoria, aree coinvolte nella pianificazione ed esecuzione del movimento volontario.
 * [ ] È impossibile decodificare la velocità del movimento, solo la posizione.
 * [x] I neuroni della corteccia motoria mostrano "tuning curves" direzionali: scaricano preferenzialmente per movimenti in una certa direzione (coseno tuning).
-* [ ] L'esperimento "MindPong" di Neuralink ha dimostrato che le scimmie preferiscono i videogiochi alla libertà.
+* [ ] L'esperimento "MindPong" di Neuralink ha dimostrato che le scimmie preferiscono i videogiochi senza scale cromatiche.
 * [x] L'alta densità di elettrodi (migliaia vs centinaia) in sistemi come Neuralink permette potenzialmente di decodificare segnali più puliti e da popolazioni più ampie, migliorando la fluidità del controllo.
 * [ ] Il controllo wireless introduce una latenza trascurabile rispetto alla conduzione nervosa biologica.
 
@@ -534,7 +534,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [x] Hubel e Wiesel (Nobel per la Medicina) hanno scoperto che i neuroni della corteccia visiva primaria (V1) rispondono selettivamente a barrette di luce orientate in modo specifico (Orientation Selectivity).
 * [ ] Il libro "Eye, Brain, and Vision" di Hubel è un testo puramente matematico pieno di equazioni differenziali.
 * [x] "Eye, Brain, and Vision" è un testo divulgativo (ma rigoroso) che spiega l'organizzazione gerarchica del sistema visivo e la plasticità (periodi critici), basato sulle loro scoperte sperimentali.
-* [ ] Il "Bignami" citato dal professore è un prestigioso trattato internazionale di neurochirurgia.
+* [ ] Il "Bignami" citato dal professore è un prestigioso dizionario di termini medici e tecnici.
 * [x] Il riferimento al "Bignami" è un'analogia culturale italiana per indicare i riassunti essenziali ("bigini") dei concetti base (neurone, sinapsi) per chi ha lacune in biologia.
 * [ ] La neurofisiologia cellulare può essere compresa appieno senza alcuna nozione di chimica fisica (es. potenziale elettrochimico).
 * [x] La comprensione dei meccanismi di base (potenziale di riposo, Nernst) richiede la fusione di concetti di elettromagnetismo (campo elettrico, drift) e termodinamica (diffusione, gradiente chimico).
@@ -548,8 +548,8 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 * [ ] Secondo il prof. Giugliano, l'idea di "caricare" conoscenze (es. Kung Fu) nel cervello come in Matrix è una possibilità imminente.
 * [x] L'upload di conoscenze complesse (skills) è attualmente impossibile perché non comprendiamo come l'informazione semantica e procedurale sia codificata fisicamente e distribuita nelle sinapsi (engrammi).
-* [ ] Elon Musk sostiene che la neuroscienza è "risolta" e serve solo ingegneria; questa posizione è condivisa dalla comunità accademica.
-* [x] La comunità scientifica contesta l'idea che la neuroscienza sia "risolta"; mancano teorie fondamentali su come le dinamiche di rete producano funzioni cognitive superiori.
+* [ ] Elon Musk sostiene che le Neuroscienze siano "risolte" e che il gap che resta da colmare sia esclusivamente quello tecnologico; questa posizione è largamente condivisa dalla comunità accademica.
+* [x] La comunità scientifica contesta l'idea che la neuroscienza sia "risolta"; mancano ancora teorie fondamentali su come le dinamiche di rete producano funzioni cognitive superiori.
 * [x] Le protesi motorie attuali (bracci robotici) non offrono ancora un feedback sensoriale (tatto, propriocezione) adeguato, rendendo il controllo goffo e puramente visivo (closed-loop visivo).
 * [ ] Un paziente tetraplegico può imparare a usare una BCI in pochi secondi senza alcun training.
 * [x] La plasticità cerebrale (apprendimento) è parte integrante del successo di una BCI: sia l'algoritmo si adatta al cervello, sia il cervello si adatta all'algoritmo.
@@ -667,11 +667,11 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 **Dettagli sulle slide e il materiale didattico (GitHub, Colab):**
 
-* [ ] I "Jupyter Notebooks" sono quaderni fisici che lo studente deve comprare in cartoleria.
-* [x] I Notebooks (Jupyter/Colab) sono documenti digitali interattivi che mescolano codice (Python), testo (Markdown) e output grafico.
+* [ ] I "Notebook" sono quaderni fisici che lo studente deve comprare in cartoleria.
+* [x] I Notebook (Jupyter/Colab) sono documenti digitali interattivi che mescolano codice (Python), testo (Markdown) e output grafico.
 * [ ] Per usare il materiale del corso è obbligatorio installare Linux.
 * [x] L'approccio "cloud-based" tramite Google Colab elimina la necessità di installazioni locali complesse, rendendo il corso agnostico rispetto al sistema operativo dello studente (Windows/Mac/Linux).
-* [ ] Il codice Python fornito serve a hackerare i server dell'università.
+* [ ] Il codice Python fornito serve a risolvere un'equazione del quart'ordine.
 * [x] Il codice fornito (es. analisi ECG, FFT) serve come tutorial per l'elaborazione dei segnali biofisici e per promuovere la mentalità "Open Science" (dati + codice aperti).
 * [ ] Il docente stamperà le slide per tutti ogni volta.
 * [x] Le slide ("Handouts") sono fornite digitalmente in anticipo; lo studente non è tenuto a copiare tutto, ma a prendere appunti sulle discussioni o integrazioni orali.
@@ -771,7 +771,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 **Sulla "Frog Analogy" (Il docente come rana):**
 
-* [ ] Il docente si è definito una rana perché salta durante la lezione.
+* [ ] Il docente si è definito una rana perché salta spesso durante la lezione.
 * [x] L'analogia si riferisce all'esperimento di Galvani: collegando il proprio corpo (tramite elettrodi EMG) all'amplificatore, il docente diventa il "preparato biologico" che genera bioelettricità, proprio come la rana nel 1700.
 * [ ] Nell'esperimento demo, il docente usava un generatore di funzioni per simulare i muscoli.
 * [x] La sorgente del segnale era l'attività fisiologica reale dei muscoli del braccio del docente, dimostrando la natura endogena dei segnali bioelettrici.
@@ -960,7 +960,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 * [ ] Lo studente deve imparare a memoria le slide.
 * [x] Lo studente è invitato a "studiare per se stesso" e per la propria carriera, non per l'esame; la comprensione profonda è preferita alla memoria mnemonica ("Don't study just to pass").
-* [ ] Se il docente parla con accento scozzese, gli studenti devono annuire e far finta di capire.
+* [ ] Se il docente parla troppo rapidamente, agli studenti non e' permesso interrompere per spiegazioni.
 * [x] Il docente invita esplicitamente a interromperlo ("give me a sign") se la lingua o il contenuto non sono chiari, promettendo di ripetere o spiegare diversamente.
 * [ ] L'orario di inizio lezione preferito dal docente è il "quarto d'ora accademico" (14:15).
 * [x] Il docente ha espresso preferenza per iniziare "sharp" (puntuali, es. 14:00) per finire prima, ma ha lasciato la decisione alla classe.
@@ -1194,7 +1194,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 **Sintesi sul "Messaggio" di Elon Musk vs Realtà Accademica:**
 
-* [ ] Il docente odia Elon Musk per motivi personali.
+* [ ] Il docente critica a priori l'approccio di Elon Musk perche' non basato sui principi dell'Open Science.
 * [x] La critica a Musk riguarda la comunicazione ("Telepathy", "Neuroscience is over") che crea false speranze nei pazienti, semplificando eccessivamente la complessità biologica non ancora risolta.
 * [ ] Neuralink non ha portato alcuna innovazione.
 * [x] Neuralink ha spinto enormemente l'avanzamento tecnologico (canali, robotica, packaging), ma si basa su concetti neuroscientifici (decodifica motoria) noti in accademia da decenni.
@@ -1218,9 +1218,9 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [x] L'interno della cellula contiene grandi anioni impermeabili (proteine cariche negativamente, $A^-$) che non possono uscire, contribuendo all'elettroneutralità macroscopica interna.
 * [ ] La differenza di concentrazione ionica si dissipa spontaneamente in pochi millisecondi dopo la morte della cellula.
 * [x] I gradienti di concentrazione sono mantenuti attivamente (con spesa di ATP) da pompe ioniche come la $Na^+/K^+$-ATPasi, contrastando le "perdite" (leak) attraverso la membrana.
-* [ ] L'analogia suggerisce che la membrana è permeabile allo zucchero della banana.
+* [ ] L'analogia suggerisce che lo ione dominante all'esterno delle cellule sia il potassio ($K^+$).
 
-> **Ragionamento:** "Banana in the Ocean" è la mnemonica standard: K+ dentro (Banana), Na+/Cl- fuori (Oceano). Il Calcio è un caso speciale: tenuto bassissimo dentro per funzionare come trigger di segnalazione (es. rilascio vescicole). Gli anioni fissi ($A^-$) sono cruciali per l'equilibrio di Donnan, ma nel corso ci si focalizza sui gradienti attivi.
+> **Ragionamento:** "Banana in the Ocean" è la mnemonica standard: K+ dentro (Banana), Na+/Cl- fuori (Oceano). Il Calcio è un caso speciale: tenuto bassissimo dentro per funzionare come trigger di segnalazione (es. rilascio vescicole). Gli anioni fissi ($A^-$) sono cruciali per un'altra trattazione nota come equilibrio di Donnan, ma nel nostro corso ci si focalizza sui gradienti attivi.
 
 -----
 
