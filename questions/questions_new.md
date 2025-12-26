@@ -130,7 +130,7 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 **Considerando la dimostrazione EMG (Elettromiografia) tentata in classe e i concetti di rumore ed interferenza:**
 
 * [ ] Il corpo umano è un conduttore perfetto isolato elettricamente dall'ambiente.
-* [x] L'interferenza a 50 Hz (o 60 Hz) è un rumore ubiquitario dovuto all'accoppiamento capacitivo o induttivo con la rete elettrica di distribuzione negli edifici.
+* [x] L'interferenza a 50 Hz (o 60 Hz in US) è un rumore onnipresente dovuto all'accoppiamento capacitivo o induttivo con la rete elettrica di distribuzione negli edifici.
 * [x] Per misurare segnali biologici piccoli ($\mu V$ o $mV$) è necessario un amplificatore differenziale con alto CMRR (Common Mode Rejection Ratio) per eliminare i disturbi comuni al riferimento e all'elettrodo attivo.
 * [ ] Se un soggetto tocca la "terra" (ground) di un dispositivo collegato alla rete senza isolamento galvanico, non corre mai alcun rischio di elettrocuzione.
 * [x] La contrazione isometrica genera un pattern di interferenza costruttiva e distruttiva dei potenziali d'azione delle unità motorie (MUAP), risultando in un aumento della varianza del segnale grezzo.
@@ -1133,13 +1133,13 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 * [ ] Il libro "From Neuron to Brain" (Nicholls et al.) è consigliato per imparare a programmare in Python.
 * [x] "From Neuron to Brain" è citato come testo di riferimento per la biofisica neuronale, utile per approfondire i meccanismi cellulari discussi.
 * [ ] Il testo "Eye, Brain, and Vision" di Hubel è protetto da copyright e impossibile da trovare.
-* [x] Il PDF di "Eye, Brain, and Vision" è disponibile (spesso linkato nelle risorse) poiché è stato reso di pubblico dominio/accessibile, ed è consigliato come lettura introduttiva leggera ma autorevole.
+* [x] Il PDF di "Eye, Brain, and Vision" è disponibile (menzionato a lezione e disponibile su GitHub) poiché è stato reso di pubblico dominio/accessibile, ed è consigliato come lettura introduttiva leggera ma autorevole.
 * [ ] Il docente sconsiglia l'uso di Wikipedia o risorse online.
 * [x] Il docente incoraggia l'uso di risorse online (tutorial, video) per l'inglese e la programmazione, ma avverte contro i siti "pirata" per scaricare illegalmente libri di testo completi.
 * [ ] Il "Bignami" menzionato si riferisce a un famoso neuroscienziato italiano.
 * [x] Il termine "Bignami" è usato colloquialmente per indicare un riassunto sintetico ("cheat sheet") di 2-4 pagine sui concetti base (neurone, sinapsi) disponibile su GitHub per chi ha lacune biologiche.
 * [ ] La lettura dei libri consigliati è obbligatoria per superare l'esame con 18.
-* [x] Le letture sono definite "per voi stessi" (selfish study); l'esame verte sui concetti discussi a lezione, ma i libri servono a costruire una competenza professionale solida.
+* [x] Le letture e i riferimenti sono pensati "per voi stessi" (selfish study); l'esame verte sui concetti discussi a lezione, ma i libri servono a costruire una competenza professionale solida.
 
 > **Ragionamento:** Verifica l'attenzione ai dettagli sulle fonti. Il docente distingue tra materiale d'esame (lezioni/slide) e materiale per la crescita professionale (libri/paper). Il riferimento al Bignami è specifico della cultura didattica italiana citata a lezione.
 
