@@ -973,23 +973,6 @@ Questo set di domande a risposta chiusa (con soluzioni e suggerimenti sul ragion
 
 ### **Blocco 1: Dettagli, Curiosità e Sintesi Concettuale (Parte 8)**
 
-**Riferendosi ai dettagli biografici e introduttivi sul docente (Prof. Michele Giugliano):**
-
-* [ ] Il docente ha studiato Bioingegneria in America.
-* [x] Il docente è un ingegnere elettronico di formazione (Genova), con un dottorato in Bioingegneria, e ha lavorato in Svizzera (Berna, Losanna), Belgio (Anversa) e alla SISSA (Trieste) prima di Modena.
-* [ ] Il docente odia il cioccolato.
-* [x] Il docente ha scherzato sul fatto che le sue scelte di carriera (Svizzera, Belgio) fossero guidate dalla ricerca del "miglior cioccolato".
-* [ ] La "G" nel nome del docente è silenziosa.
-* [x] Il docente ha specificato che la "G" nel cognome "Giugliano" è ridondante ma importante per trovarlo su Google ed evitare omonimie.
-* [ ] Il docente si aspetta che gli studenti conoscano perfettamente la programmazione in C++.
-* [x] Il docente non si aspetta che gli studenti siano esperti informatici ("not computer geeks"), ma offre supporto per l'uso di Python e GitHub, considerandoli strumenti professionali utili.
-* [ ] Il docente usa Discord per le comunicazioni ufficiali.
-* [x] Il docente ha disabilitato Discord e usa esclusivamente Microsoft Teams per la comunicazione e il "community building" tra studenti.
-
-> **Ragionamento:** Questi dettagli, sebbene aneddotici, verificano l'attenzione dello studente durante la lezione e stabiliscono il contesto umano e logistico per il corso.
-
------
-
 **Sull'iconografia della cultura pop citata ("L'uomo da sei milioni di dollari"):**
 
 * [ ] La serie TV citata serviva a dimostrare che la bioingegneria è impossibile.
