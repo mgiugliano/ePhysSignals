@@ -21,7 +21,9 @@ If you have never heard of "notebooks", watch this light and short (25 min) vide
 - Synaptically coupled neurons [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/coupled_HH.ipynb)
 - Short-term synaptic depression [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Tsodyks_Markram.ipynb)
 - Cable Theory [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Cable_theory.ipynb)
-- Multicompartmental model neurons [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/MultiCompartmental_Neurons.ipynb)
+- Multicompartmental model neurons BALL and STICK [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/MultiCompartmental_Neurons.ipynb)
+- Multicompartmental model neurons BBP Pyramidal Cell[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/BBP_L5PC.ipynb)
+- Extracellular Potentials with a BBP Pyramidal Cell[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/LFPy_with_BBP_L5PC.ipynb)
 - Signal Analysis  [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mgiugliano/ePhysSignals/blob/main/notebooks/Play_Extra_Intra_Cell.ipynb)
 
 
