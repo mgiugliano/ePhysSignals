@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Segnali elettrofisiologici — Interactive Mind Map</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --bg-canvas: #f1f5f9;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-subtle: #64748b;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+    --root-bg: #0f172a;
+    --root-text: #ffffff;
+    --grid-dot: #cbd5e1;
+    --accent: #4f46e5;
+  }
+  [data-theme="dark"] {
+    --bg: #0b1120;
+    --bg-canvas: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #0f172a;
+    --border: #334155;
+    --text: #f8fafc;
+    --text-muted: #cbd5e1;
+    --text-subtle: #94a3b8;
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --root-bg: #f8fafc;
+    --root-text: #0f172a;
+    --grid-dot: #1e293b;
+    --accent: #818cf8;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden;
+  }
+
+  /* Top Toolbar */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 58px; z-index: 30;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; padding: 0 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .brand {
+    display: flex; flex-direction: column; margin-right: 6px; min-width: 195px;
+  }
+  .brand-title { font-weight: 750; font-size: 15px; letter-spacing: -0.01em; line-height: 1.15; }
+  .brand-sub { font-size: 11px; color: var(--text-subtle); }
+
+  .search-wrap { position: relative; flex: 1; max-width: 280px; }
+  .search-input {
+    width: 100%; height: 34px; padding: 0 28px 0 30px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 13px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); background: var(--surface); }
+  .search-icon {
+    position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--text-subtle); pointer-events: none;
+  }
+  .search-clear {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    border: none; background: transparent; color: var(--text-subtle);
+    cursor: pointer; font-size: 14px; display: none; padding: 2px 4px;
+  }
+  .search-results {
+    position: absolute; top: 38px; left: 0; right: 0; max-height: 360px; overflow-y: auto;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: var(--shadow); display: none; z-index: 50;
+  }
+  .search-item {
+    padding: 8px 11px; cursor: pointer; border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .search-item:last-child { border-bottom: none; }
+  .search-item:hover { background: var(--surface-2); }
+  .search-item-title { font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .search-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .search-item-sub { font-size: 11px; color: var(--text-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .lecture-select {
+    height: 34px; max-width: 255px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 12.5px; padding: 0 8px;
+    outline: none; cursor: pointer;
+  }
+  .lecture-select:focus { border-color: var(--accent); }
+
+  .btn-group { display: flex; align-items: center; gap: 4px; }
+  .btn {
+    height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 12px; font-weight: 550;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+
+  .spacer { flex: 1; }
+
+  /* Canvas */
+  #stage {
+    position: fixed; top: 58px; left: 0; right: 0; bottom: 0;
+    background-color: var(--bg-canvas);
+    background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    cursor: grab; user-select: none; overflow: hidden;
+  }
+  #stage.dragging { cursor: grabbing; }
+  svg#mindmap { width: 100%; height: 100%; display: block; }
+
+  .edge { fill: none; stroke-linecap: round; transition: opacity 0.2s, stroke-width 0.2s; }
+
+  /* Interactive Cross-Links */
+  .cross-group { cursor: pointer; }
+  .cross-hit { fill: none; stroke: transparent; stroke-width: 14px; cursor: pointer; }
+  .cross-edge {
+    fill: none; stroke-dasharray: 6 5; stroke-linecap: round;
+    transition: opacity 0.18s, stroke-width 0.18s, stroke 0.18s;
+    pointer-events: none;
+  }
+  .cross-group.highlighted .cross-edge,
+  .cross-group:hover .cross-edge {
+    stroke-opacity: 0.96 !important;
+    stroke-width: 3px !important;
+    stroke-dasharray: 8 4;
+    animation: dashFlow 1.1s linear infinite;
+  }
+  .cross-group.dimmed .cross-edge { stroke-opacity: 0.08 !important; }
+  .cross-badge { pointer-events: none; transition: opacity 0.18s, transform 0.18s; }
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -24; }
+  }
+
+  .node-group { cursor: pointer; transition: opacity 0.2s; }
+  .node-box { transition: filter 0.15s, stroke-width 0.15s; }
+  .node-group:hover .node-box { filter: brightness(0.97) drop-shadow(0 3px 8px rgba(0,0,0,0.14)); }
+  .node-group.selected .node-box { stroke-width: 2.8px !important; filter: drop-shadow(0 4px 12px rgba(79,70,229,0.34)); }
+  .node-group.link-endpoint .node-box { stroke-width: 2.8px !important; filter: drop-shadow(0 0 10px rgba(79,70,229,0.45)); }
+  .node-group.dimmed { opacity: 0.16; }
+  .edge.dimmed { opacity: 0.08; }
+  .node-label { font-family: inherit; pointer-events: none; }
+  .toggle-btn { cursor: pointer; }
+
+  /* Floating Tooltip for Interactive Links */
+  .link-tooltip {
+    position: fixed; z-index: 60; pointer-events: none; display: none;
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 11px; max-width: 310px;
+    box-shadow: var(--shadow); font-size: 12px; line-height: 1.38;
+  }
+  .link-tooltip-title { font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .link-tooltip-sub { font-size: 11px; color: var(--text-subtle); }
+
+  /* Floating Zoom & Legend Controls */
+  .floating-controls {
+    position: fixed; left: 16px; bottom: 16px; z-index: 25;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .zoom-bar {
+    display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border);
+    padding: 4px 6px; border-radius: 10px; box-shadow: var(--shadow); width: fit-content;
+  }
+  .zoom-bar .btn { height: 30px; padding: 0 9px; border: none; background: transparent; }
+  .zoom-bar .btn:hover { background: var(--surface-2); }
+  .hint-text { font-size: 11px; color: var(--text-subtle); padding: 0 6px; border-left: 1px solid var(--border); }
+
+  .pillar-legend {
+    display: flex; flex-wrap: wrap; gap: 6px; max-width: 580px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 7px 10px; border-radius: 10px; box-shadow: var(--shadow);
+  }
+  .legend-chip {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 550;
+    color: var(--text-muted); cursor: pointer; padding: 2px 6px; border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .legend-chip:hover { background: var(--surface-2); color: var(--text); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Inspector Side Drawer */
+  .drawer {
+    position: fixed; top: 72px; right: 16px; bottom: 16px; width: 380px; max-width: calc(100vw - 32px);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: var(--shadow); z-index: 28; display: flex; flex-direction: column;
+    transform: translateX(420px); transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  }
+  .drawer-breadcrumb {
+    font-size: 11px; color: var(--text-subtle); margin-bottom: 5px;
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  }
+  .crumb-link { cursor: pointer; text-decoration: underline; text-decoration-color: transparent; }
+  .crumb-link:hover { color: var(--text); text-decoration-color: currentColor; }
+  .drawer-title { font-size: 17px; font-weight: 750; line-height: 1.25; margin: 0; }
+  .drawer-close {
+    border: none; background: var(--surface-2); color: var(--text-muted);
+    width: 28px; height: 28px; border-radius: 7px; cursor: pointer; font-size: 16px;
+    flex-shrink: 0; display: grid; place-items: center;
+  }
+  .drawer-close:hover { color: var(--text); }
+
+  .drawer-body { padding: 14px 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .drawer-summary { font-size: 13.5px; line-height: 1.55; color: var(--text); margin: 0; }
+
+  .formula-box {
+    background: var(--surface-2); border-left: 3px solid var(--accent);
+    padding: 9px 11px; border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px; line-height: 1.45; color: var(--text); word-break: break-word;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-subtle); margin-bottom: 6px;
+  }
+  .lecture-list, .pair-list { display: flex; flex-direction: column; gap: 6px; }
+  .lecture-card, .pair-card {
+    padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); cursor: pointer; transition: border-color 0.15s;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .lecture-card:hover, .pair-card:hover { border-color: var(--accent); }
+  .lecture-card-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .lecture-badge { font-size: 11px; font-weight: 700; color: var(--accent); }
+  .role-pill {
+    font-size: 10px; padding: 1px 6px; border-radius: 999px; font-weight: 600;
+    background: rgba(79,70,229,0.12); color: var(--accent);
+  }
+  .role-pill.revisited { background: rgba(100,116,139,0.16); color: var(--text-subtle); }
+  .lecture-title-text { font-size: 12.5px; font-weight: 550; line-height: 1.3; }
+
+  .pair-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 600; }
+  .pair-btn {
+    border: none; background: transparent; padding: 0; color: var(--text); font: inherit;
+    cursor: pointer; text-decoration: underline; text-decoration-color: rgba(100,116,139,0.35);
+    display: inline-flex; align-items: center; gap: 4px; text-align: left;
+  }
+  .pair-btn:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 11.5px; padding: 4px 9px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .tag-pill {
+    font-size: 10.5px; padding: 2px 8px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border);
+  }
+
+  .filter-banner {
+    position: fixed; top: 68px; left: 50%; transform: translateX(-50%); z-index: 26;
+    background: var(--accent); color: #ffffff; padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; display: none; align-items: center; gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .filter-banner button {
+    border: none; background: rgba(255,255,255,0.22); color: #fff;
+    border-radius: 999px; padding: 2px 8px; cursor: pointer; font-size: 11px; font-weight: 600;
+  }
+
+  @media (max-width: 960px) {
+    .brand { display: none; }
+    .pillar-legend, .hint-text { display: none; }
+    .lecture-select { max-width: 150px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-title" id="courseTitle">Segnali elettrofisiologici</span>
+    <span class="brand-sub" id="courseStats">16 classes · Interactive Mind Map</span>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="searchInput" class="search-input" type="text" placeholder="Search concepts, equations... (/)" autocomplete="off" />
+    <button id="searchClear" class="search-clear" title="Clear">×</button>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+
+  <select id="lectureFilter" class="lecture-select" title="Highlight topics by class title">
+    <option value="">All 16 Classes (No Filter)</option>
+  </select>
+
+  <div class="btn-group">
+    <button id="btnLayoutTree" class="btn active" title="Bilateral horizontal mind map">Mind Map</button>
+    <button id="btnLayoutRadial" class="btn" title="360° radial mind map">Radial</button>
+  </div>
+
+  <div class="btn-group">
+    <button id="btnOverview" class="btn active" title="Show pillars & topic clusters">Overview</button>
+    <button id="btnExpandAll" class="btn" title="Expand all individual concepts">Expand All</button>
+    <button id="btnCrossLinks" class="btn active" title="Show/hide interactive conceptual cross-links">Cross-Links</button>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="btn-group">
+    <button id="btnExportSVG" class="btn" title="Download vector SVG">SVG</button>
+    <button id="btnExportMD" class="btn" title="Download Markdown outline">MD</button>
+    <button id="btnTheme" class="btn" title="Toggle light/dark mode">◐</button>
+  </div>
+</header>
+
+<div id="filterBanner" class="filter-banner">
+  <span id="filterBannerText"></span>
+  <button id="filterBannerClear">Clear</button>
+</div>
+
+<div id="linkTooltip" class="link-tooltip"></div>
+
+<main id="stage">
+  <svg id="mindmap" xmlns="http://www.w3.org/2000/svg">
+    <g id="viewport">
+      <g id="layer-edges"></g>
+      <g id="layer-cross"></g>
+      <g id="layer-nodes"></g>
+    </g>
+  </svg>
+</main>
+
+<div class="floating-controls">
+  <div class="zoom-bar">
+    <button id="btnZoomIn" class="btn" title="Zoom in">+</button>
+    <button id="btnZoomOut" class="btn" title="Zoom out">−</button>
+    <button id="btnFit" class="btn" title="Fit mind map to screen">Fit</button>
+    <span class="hint-text">Click nodes or dashed cross-links · Double-click clusters to expand</span>
+  </div>
+  <div id="pillarLegend" class="pillar-legend"></div>
+</div>
+
+<aside id="drawer" class="drawer" aria-label="Topic details">
+  <div class="drawer-header">
+    <div>
+      <div id="drawerBreadcrumb" class="drawer-breadcrumb"></div>
+      <h2 id="drawerTitle" class="drawer-title"></h2>
+    </div>
+    <button id="drawerClose" class="drawer-close" title="Close (Esc)">×</button>
+  </div>
+  <div class="drawer-body">
+    <p id="drawerSummary" class="drawer-summary"></p>
+    <div id="drawerFormulaWrap" style="display:none;">
+      <div class="section-label">Key Relation / Example</div>
+      <div id="drawerFormula" class="formula-box"></div>
+    </div>
+    <div id="drawerPairsWrap" style="display:none;">
+      <div class="section-label">Connected Concept Pairs</div>
+      <div id="drawerPairs" class="pair-list"></div>
+    </div>
+    <div id="drawerLecturesWrap">
+      <div class="section-label">Discussed In</div>
+      <div id="drawerLectures" class="lecture-list"></div>
+    </div>
+    <div id="drawerRelatedWrap" style="display:none;">
+      <div class="section-label">Related Topics (Cross-Links)</div>
+      <div id="drawerRelated" class="chips"></div>
+    </div>
+    <div id="drawerChildrenWrap" style="display:none;">
+      <div class="section-label">Subtopics (Click to Inspect)</div>
+      <div id="drawerChildren" class="chips"></div>
+    </div>
+    <div id="drawerTagsWrap" style="display:none;">
+      <div class="section-label">Categories</div>
+      <div id="drawerTags" class="chips"></div>
+    </div>
+  </div>
+</aside>
+
+<script>
+const DATA = {"course": "Segnali elettrofisiologici", "subtitle": "Bioingegneria — UNIMORE (16 Lectures)", "lectures": [{"id": "L1", "number": 1, "file": "s1.txt", "title": "Course introduction and overview of biological signals"}, {"id": "L2", "number": 2, "file": "s2.txt", "title": "Brain-machine interfaces and neural coding"}, {"id": "L3", "number": 3, "file": "s3.txt", "title": "Mathematical and physical prerequisites"}, {"id": "L4", "number": 4, "file": "s4.txt", "title": "Nernst-Planck, diffusion and the membrane capacitor"}, {"id": "L5", "number": 5, "file": "s5.txt", "title": "Nernst and GHK resting potential"}, {"id": "L6", "number": 6, "file": "s6.txt", "title": "Membrane RC dynamics and action potential basis"}, {"id": "L7", "number": 7, "file": "s7.txt", "title": "Markov kinetics and the Hodgkin-Huxley model"}, {"id": "L8", "number": 8, "file": "s8.txt", "title": "Hodgkin-Huxley simulations in Python"}, {"id": "L9", "number": 9, "file": "s9.txt", "title": "Single-channel gating and channel noise"}, {"id": "L10", "number": 10, "file": "s10.txt", "title": "Synaptic receptors and conductance models"}, {"id": "L11", "number": 11, "file": "s11.txt", "title": "Electrical synapses and short-term plasticity"}, {"id": "L12", "number": 12, "file": "s12.txt", "title": "Long-term plasticity and extracellular signals"}, {"id": "L13", "number": 13, "file": "s13.txt", "title": "Extracellular Spikes and the Passive Cable Equation"}, {"id": "L14", "number": 14, "file": "s14.txt", "title": "Cable Theory and Dendritic Integration"}, {"id": "L15", "number": 15, "file": "s15.txt", "title": "Extracellular Potentials: Spikes, MUA and LFP Biophysics"}, {"id": "L16", "number": 16, "file": "s16.txt", "title": "Spike Detection, Sorting and Extracellular Signal Analysis"}], "pillars": [{"id": "p1", "title": "Foundations, History & Neural Coding", "shortTitle": "Foundations & Coding", "color": "#4F46E5", "summary": "Core mathematical/circuit modeling mindset, historical origins of bioelectricity, sensory and spatial neural coding, and clinical neurotechnologies (BMIs, optogenetics, DBS, neuromorphic AI).", "lectures": ["L1", "L2", "L12", "L16"]}, {"id": "p2", "title": "Membrane Potential Biophysics", "shortTitle": "Membrane Biophysics", "color": "#0D9488", "summary": "Physical and mathematical prerequisites, Nernst-Planck electrodiffusion, recording electrode electrochemistry, phospholipid membrane capacitance, and Nernst/GHK resting potential equations.", "lectures": ["L3", "L4", "L5"]}, {"id": "p3", "title": "Action Potentials, Channels & Noise", "shortTitle": "APs & Channel Noise", "color": "#E11D48", "summary": "Passive RC dynamics, ionic basis of the action potential, mass-action/Markov kinetics, the 4D Hodgkin-Huxley model, Python excitability simulations, and single-channel patch-clamp stochasticity.", "lectures": ["L6", "L7", "L8", "L9", "L10"]}, {"id": "p4", "title": "Synapses & Neural Plasticity", "shortTitle": "Synapses & Plasticity", "color": "#D97706", "summary": "Electrical gap junctions, chemical ionotropic and metabotropic receptor kinetics, short-term plasticity (Tsodyks-Markram), network Up/Down oscillations, epilepsy, and long-term Hebbian/STDP plasticity.", "lectures": ["L2", "L10", "L11", "L12", "L16"]}, {"id": "p5", "title": "Cable Theory & Dendritic Computation", "shortTitle": "Cable & Dendrites", "color": "#059669", "summary": "Passive 1D cable PDE derivation, space and time constants, DC/AC/transient solutions, Rall's ball-and-stick reduction, NEURON simulations, active bAPs/Ca2+ spikes, dendritic democracy, and spines.", "lectures": ["L13", "L14", "L15", "L16"]}, {"id": "p6", "title": "Extracellular Signals & Spike Analysis", "shortTitle": "Extracellular & Sorting", "color": "#7C3AED", "summary": "Volume conduction biophysics, extracellular spike (-dV/dt), MUA and LFP generation, recording probes from microwires to Neuropixels, sampling/filtering, MAD thresholding, and PCA/clustering spike sorting.", "lectures": ["L12", "L13", "L15", "L16"]}], "nodes": [{"id": "root", "title": "Segnali elettrofisiologici", "level": 0, "pillar": "root", "parentId": null, "summary": "Comprehensive concept map of the 16-lecture Bioengineering course 'Segnali elettrofisiologici' (UNIMORE), spanning membrane biophysics, Hodgkin-Huxley excitability, single-channel noise, synaptic plasticity, dendritic cable theory, volume conduction, and extracellular spike sorting.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "primary"}, {"id": "L3", "role": "primary"}, {"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}, {"id": "L6", "role": "primary"}, {"id": "L7", "role": "primary"}, {"id": "L8", "role": "primary"}, {"id": "L9", "role": "primary"}, {"id": "L10", "role": "primary"}, {"id": "L11", "role": "primary"}, {"id": "L12", "role": "primary"}, {"id": "L13", "role": "primary"}, {"id": "L14", "role": "primary"}, {"id": "L15", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation", "analysis"], "relatedIds": []}, {"id": "p1", "title": "Foundations, History & Neural Coding", "level": 1, "pillar": "p1", "parentId": "root", "summary": "Core mathematical/circuit modeling mindset, historical origins of bioelectricity, sensory and spatial neural coding, and clinical neurotechnologies (BMIs, optogenetics, DBS, neuromorphic AI).", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "primary"}, {"id": "L12", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "p2", "title": "Membrane Potential Biophysics", "level": 1, "pillar": "p2", "parentId": "root", "summary": "Physical and mathematical prerequisites, Nernst-Planck electrodiffusion, recording electrode electrochemistry, phospholipid membrane capacitance, and Nernst/GHK resting potential equations.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "p3", "title": "Action Potentials, Channels & Noise", "level": 1, "pillar": "p3", "parentId": "root", "summary": "Passive RC dynamics, ionic basis of the action potential, mass-action/Markov kinetics, the 4D Hodgkin-Huxley model, Python excitability simulations, and single-channel patch-clamp stochasticity.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "primary"}, {"id": "L8", "role": "primary"}, {"id": "L9", "role": "primary"}, {"id": "L10", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "p4", "title": "Synapses & Neural Plasticity", "level": 1, "pillar": "p4", "parentId": "root", "summary": "Electrical gap junctions, chemical ionotropic and metabotropic receptor kinetics, short-term plasticity (Tsodyks-Markram), network Up/Down oscillations, epilepsy, and long-term Hebbian/STDP plasticity.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L10", "role": "primary"}, {"id": "L11", "role": "primary"}, {"id": "L12", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "p5", "title": "Cable Theory & Dendritic Computation", "level": 1, "pillar": "p5", "parentId": "root", "summary": "Passive 1D cable PDE derivation, space and time constants, DC/AC/transient solutions, Rall's ball-and-stick reduction, NEURON simulations, active bAPs/Ca2+ spikes, dendritic democracy, and spines.", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L14", "role": "primary"}, {"id": "L15", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "p6", "title": "Extracellular Signals & Spike Analysis", "level": 1, "pillar": "p6", "parentId": "root", "summary": "Volume conduction biophysics, extracellular spike (-dV/dt), MUA and LFP generation, recording probes from microwires to Neuropixels, sampling/filtering, MAD thresholding, and PCA/clustering spike sorting.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L13", "role": "primary"}, {"id": "L15", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": []}, {"id": "c1_1", "title": "Signal Theory & Modeling Mindset", "level": 2, "pillar": "p1", "parentId": "p1", "summary": "Foundational view of biological signals through Shannon information, functional representation, dimensional consistency, and circuit-based mathematical simplification.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L3", "role": "revisited"}], "formula": "", "tags": ["math/physics", "model/equation"], "relatedIds": []}, {"id": "c1_2", "title": "History of Bioelectricity & Excitable Cells", "level": 2, "pillar": "p1", "parentId": "p1", "summary": "Historical arc from ancient clinical neurology and Galvani/Volta to Penfield's cortical mapping and the modern taxonomy of excitable tissues.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "primary"}, {"id": "L3", "role": "primary"}], "formula": "", "tags": ["history", "biophysics"], "relatedIds": []}, {"id": "c1_3", "title": "Neural Coding & Spatial Navigation", "level": 2, "pillar": "p1", "parentId": "p1", "summary": "How single neurons and populations represent sensory stimuli, space, and abstract concepts across the visual pathway, hippocampus, entorhinal cortex, and temporal lobe.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "primary"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "analysis"], "relatedIds": []}, {"id": "c1_4", "title": "Neurotechnologies, BMIs & Neuro-AI", "level": 2, "pillar": "p1", "parentId": "p1", "summary": "Clinical and emerging neural interfaces—from cardiac pacemakers, DBS, and optogenetics to intracortical/endovascular BMIs and neuromorphic hardware.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L15", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["application", "experiment/tool"], "relatedIds": []}, {"id": "n_shannon_signal", "title": "Biological Signal & Shannon Information", "level": 3, "pillar": "p1", "parentId": "c1_1", "summary": "A signal is a physical quantity varying in space and/or time that conveys information in Claude Shannon's sense of surprise or improbability; constant quantities carry zero information.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "Low probability event ⇒ high information content", "tags": ["analysis", "math/physics"], "relatedIds": ["n_epilepsy_sync", "n_signal_dim"]}, {"id": "n_signal_dim", "title": "Signal Representation & Dimensionality", "level": 3, "pillar": "p1", "parentId": "c1_1", "summary": "Biological signals are modeled as functions, lookup tables, or discrete sampled vectors spanning 1D time series (ECG/EMG), 2D images, 3D video, 4D fMRI, and vector fields.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L3", "role": "revisited"}], "formula": "", "tags": ["analysis", "math/physics"], "relatedIds": ["n_nyquist_quant", "n_sinusoid_dim", "n_shannon_signal"]}, {"id": "n_sinusoid_dim", "title": "Dimensional Analysis of Sinusoids", "level": 3, "pillar": "p1", "parentId": "c1_1", "summary": "Trigonometric arguments must be dimensionless (radians), which immediately fixes physical units of frequency parameters and underpins sinusoidal system identification.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L3", "role": "revisited"}], "formula": "sin(2π · f · t)  [2πft dimensionless ⇒ f in Hz]", "tags": ["math/physics", "analysis"], "relatedIds": ["n_ac_cable", "n_chirp_phase", "n_signal_dim"]}, {"id": "n_modeling_popp", "title": "Scientific Modeling & Falsifiability", "level": 3, "pillar": "p1", "parentId": "c1_1", "summary": "Mathematical bioengineering deliberately simplifies reality (point neurons, pendulum analogy) to gain predictive power, guided by Lord Kelvin's constructive dictum, Occam's razor, and Karl Popper's falsifiability.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L9", "role": "revisited"}], "formula": "", "tags": ["model/equation", "history"], "relatedIds": ["n_lumped_patch", "n_markov_indep"]}, {"id": "n_equiv_circuit", "title": "Equivalent Electrical Circuit Analogy", "level": 3, "pillar": "p1", "parentId": "c1_1", "summary": "Resistors, capacitors, Kirchhoff's laws, and linear systems analysis provide the quantitative engineering language for modeling excitable membranes.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L4", "role": "revisited"}, {"id": "L5", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_lumped_patch", "n_ohmic_vs_ghk"]}, {"id": "n_galvani_volta", "title": "Origins of Bioelectricity (Galvani & Volta)", "level": 3, "pillar": "p1", "parentId": "c1_2", "summary": "18th-century frog muscle contraction experiments by Luigi Galvani and Alessandro Volta overturned vitalist 'animal spirit' theories and launched electrophysiology.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L4", "role": "revisited"}], "formula": "", "tags": ["history", "biophysics"], "relatedIds": ["n_hist_perm"]}, {"id": "n_ancient_neuro", "title": "Ancient Clinical Neuroscience", "level": 3, "pillar": "p1", "parentId": "c1_2", "summary": "Early recognition of the brain as the seat of cognition and motor control, from ancient Egyptian observations of contralateral paralysis after head wounds to Hippocrates.", "lectures": [{"id": "L1", "role": "primary"}], "formula": "", "tags": ["history"], "relatedIds": ["n_homunculus"]}, {"id": "n_excitable_cells", "title": "Excitable Cell Taxonomy & Channelopathies", "level": 3, "pillar": "p1", "parentId": "c1_2", "summary": "While all living cells maintain a resting voltage, only excitable cells—neurons, cardiac myocytes, skeletal muscle, and pancreatic beta cells—generate rapid impulses; defects in channel proteins cause genetic channelopathies.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L3", "role": "primary"}, {"id": "L8", "role": "revisited"}], "formula": "Neuron AP: −70 mV → +30 mV in ~1 ms", "tags": ["biophysics", "application"], "relatedIds": ["n_life_death_rest", "n_pharma_ttx_tea"]}, {"id": "n_homunculus", "title": "Cortical Homunculus (Penfield)", "level": 3, "pillar": "p1", "parentId": "c1_2", "summary": "Wilder Penfield's intraoperative electrical stimulation in awake epilepsy patients revealed topologically organized motor/somatosensory strips over-representing hands, lips, and tongue, enabling targeted BMI placement.", "lectures": [{"id": "L2", "role": "primary"}], "formula": "", "tags": ["history", "biophysics", "experiment/tool"], "relatedIds": ["n_invasive_bmi", "n_epilepsy_sync", "n_ancient_neuro"]}, {"id": "n_rosetta_code", "title": "Neural Code & Missing Rosetta Stone", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Action potential trains act like Morse code carrying information, yet unlike Morse code we still lack a universal 'Rosetta Stone' mapping spikes directly to thoughts or meaning.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L7", "role": "revisited"}], "formula": "", "tags": ["analysis", "biophysics"], "relatedIds": ["n_ml_decoding_limits", "n_fi_curve"]}, {"id": "n_visual_pathway", "title": "Hierarchical Visual Pathway & Retinotopy", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Hubel & Wiesel characterized the mammalian visual cascade (retina → LGN → V1 → V2) preserving spatial retinotopy and inspiring multi-layer deep neural networks.", "lectures": [{"id": "L2", "role": "primary"}], "formula": "", "tags": ["biophysics", "history", "experiment/tool"], "relatedIds": ["n_receptive_fields", "n_v1_orientation", "n_neuron_dnn", "n_neuroprosthetics"]}, {"id": "n_receptive_fields", "title": "Receptive Fields & Center-Surround Cells", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Retinal ganglion cells—the only spiking retinal neurons—exhibit antagonistic center-on/surround-off receptive fields, turning the retina into a spatial contrast and edge detector.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L4", "role": "revisited"}, {"id": "L9", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "analysis"], "relatedIds": ["n_v1_orientation", "n_channel_zoo", "n_visual_pathway"]}, {"id": "n_v1_orientation", "title": "Orientation & Direction Selectivity in V1", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Primary visual cortex simple and complex cells respond selectively to light bars of specific orientations and motion directions by combining aligned circular ganglion receptive fields.", "lectures": [{"id": "L2", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_receptive_fields", "n_visual_pathway"]}, {"id": "n_place_cells", "title": "Hippocampal Place Cells & Sleep Replay", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "John O'Keefe discovered hippocampal neurons firing selectively at specific spatial locations ('brain's GPS'); Matt Wilson later showed time-compressed sequence replay during sleep and planning.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool", "history"], "relatedIds": ["n_grid_cells", "n_concept_cells"]}, {"id": "n_grid_cells", "title": "Entorhinal Grid Cells & Hexagonal Lattice", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "May-Britt & Edvard Moser discovered entorhinal neurons firing on a periodic hexagonal tessellation of space; combining grids of varying phase and scale builds hippocampal place fields.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool", "math/physics"], "relatedIds": ["n_place_cells"]}, {"id": "n_spont_poisson", "title": "Spontaneous Poisson Firing & Adaptation", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Single neurons exhibit irregular spontaneous firing modeled as a Poisson point process (Mandelbrot), sensory fatigue/adaptation under sustained input, and rebound bursts after inhibition ends.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L8", "role": "revisited"}, {"id": "L9", "role": "revisited"}, {"id": "L11", "role": "revisited"}], "formula": "ISI distribution: p(Δt) ∝ exp(−λΔt)", "tags": ["biophysics", "analysis", "model/equation"], "relatedIds": ["n_channel_zoo", "n_rebound_ap", "n_noise_feature"]}, {"id": "n_concept_cells", "title": "Population Coding & Concept Cells", "level": 3, "pillar": "p1", "parentId": "c1_3", "summary": "Collective emergent coding (Parisi complex-systems paradigm) drives motor-cortex population decoding, while clinical stereo-EEG (Quiroga & Fried) revealed viewpoint-invariant temporal-lobe 'concept/grandmother cells' (e.g., Jennifer Aniston).", "lectures": [{"id": "L16", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool", "application"], "relatedIds": ["n_invasive_bmi", "n_spike_clustering", "n_place_cells", "n_ml_decoding_limits"]}, {"id": "n_invasive_bmi", "title": "Invasive BMIs: BrainGate, Nicolelis & Neuralink", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Tracks intracortical motor BMIs from Nicolelis & Lebedev (2003 monkey cursor) and Donoghue's BrainGate (Utah array human cursor/robotic arm) to Neuralink's wireless robotic-inserted threads and LLM-assisted speech synthesis.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L1", "role": "revisited"}, {"id": "L15", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["application", "experiment/tool", "history"], "relatedIds": ["n_probes_evol", "n_ml_decoding_limits", "n_glial_scar", "n_homunculus", "n_concept_cells", "n_stentrode_eeg", "n_neuroprosthetics", "n_causal_filter"]}, {"id": "n_stentrode_eeg", "title": "Endovascular Stentrode vs. Scalp EEG", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Compares invasiveness and spatial resolution across scalp EEG ('listening outside a closed door'), intracortical probes, and Synchron's FDA-approved Stentrode delivered via a cortical vein.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "application"], "relatedIds": ["n_multiscale_mod", "n_invasive_bmi"]}, {"id": "n_glial_scar", "title": "Glial Scar & Emerging Bio-Interfaces", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Chronic brain implants degrade due to astrocyte encapsulation ('glial scar'); next-generation strategies include wireless microbots, 3D silicon nanowires, gold micro-mushrooms inducing frustrated phagocytosis, and iPSC brain organoids.", "lectures": [{"id": "L2", "role": "primary"}], "formula": "", "tags": ["experiment/tool", "biophysics", "application"], "relatedIds": ["n_invasive_bmi", "n_ipsc_maturation"]}, {"id": "n_optogenetics", "title": "Optogenetics", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Nobel-recognized technique using viral vectors to express light-gated ion channels in genetically targeted neurons, enabling precise optical excitation or silencing for vision restoration and seizure arrest.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "application", "biophysics"], "relatedIds": ["n_epilepsy_sync", "n_ion_channels"]}, {"id": "n_dbs_adbs", "title": "Cardiac Pacemakers, DBS & Adaptive DBS", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Macro-electrodes adapted from cardiac pacemakers deliver high-frequency Deep Brain Stimulation (DBS) in basal ganglia to jam Parkinsonian tremor; adaptive DBS (aDBS) uses LFP spectral biomarkers in a closed-loop P/PID controller.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L12", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "", "tags": ["application", "experiment/tool", "history"], "relatedIds": ["n_lfp_biophysics", "n_epilepsy_sync"]}, {"id": "n_neuroprosthetics", "title": "Sensory/Motor Neuroprosthetics & Neuroethics", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Covers cochlear implants, retinal microelectrode arrays, and motor-driven FES with sensory feedback, highlighting neuroethical risks when manufacturers discontinue implant support (e.g., Second Sight).", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "", "tags": ["application", "experiment/tool"], "relatedIds": ["n_invasive_bmi", "n_visual_pathway"]}, {"id": "n_ml_decoding_limits", "title": "Limits of ML in Neural Decoding", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Clinical BMI 'AI' relies on statistical classification under severe labeled-data scarcity in paralyzed patients rather than true mind reading, making mechanistic biophysics indispensable.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L1", "role": "revisited"}, {"id": "L12", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["analysis", "application"], "relatedIds": ["n_rosetta_code", "n_concept_cells", "n_invasive_bmi"]}, {"id": "n_neuromorphic", "title": "Neuromorphic Engineering & Neuro-AI", "level": 3, "pillar": "p1", "parentId": "c1_4", "summary": "Contrasts the brain's ~20 W metabolic budget with gigawatt AI data centers, motivating analog weak-inversion neuromorphic chips and spike-based Edge AI.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L12", "role": "revisited"}], "formula": "Brain ~20 W vs. GW-scale AI data centers", "tags": ["application", "analysis"], "relatedIds": ["n_stdp", "n_neuron_dnn"]}, {"id": "c2_1", "title": "Mathematical & Physical Prerequisites", "level": 2, "pillar": "p2", "parentId": "p2", "summary": "Essential calculus, linear ODEs, molarity, Coulomb electrostatics, dielectric permittivity, scalar potentials, and overdamped viscous ionic mobility.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L1", "role": "revisited"}], "formula": "", "tags": ["math/physics", "biophysics"], "relatedIds": []}, {"id": "c2_2", "title": "Electrodiffusion & Nernst-Planck Transport", "level": 2, "pillar": "p2", "parentId": "p2", "summary": "Derivation of drift and diffusive fluxes from Teorell's formula, thermal Brownian motion, chemical potential, Fick's First Law, and the combined Nernst-Planck equation.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": []}, {"id": "c2_3", "title": "Membrane Capacitor & Recording Electrodes", "level": 2, "pillar": "p2", "parentId": "p2", "summary": "Aqueous electrochemistry, Helmholtz double layer vs. reversible Ag/AgCl micropipettes, phospholipid bilayer capacitance, and minimal charge separation.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": []}, {"id": "c2_4", "title": "Ionic Gradients, Nernst & GHK Equations", "level": 2, "pillar": "p2", "parentId": "p2", "summary": "Asymmetric ion concentrations, passive channels vs. ATP pumps, Nernst equilibrium potential, Ohmic vs. Goldman flux laws, and multi-ion resting potential.", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L4", "role": "revisited"}, {"id": "L6", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics"], "relatedIds": []}, {"id": "n_elem_calc", "title": "Elementary Functions & Essential Calculus", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "Qualitative behavior of 1/r, 1−exp(−αt), ln(x), and lines, together with the chain rule d/dx[ln c(x)] = (1/c)(dc/dx) and definite integrals of 1/x used in Fick and Nernst derivations.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "revisited"}], "formula": "d/dx[ln c(x)] = (1/c)·dc/dx ;  ∫(1/x)dx = ln(b/a)", "tags": ["math/physics"], "relatedIds": ["n_fick_einstein", "n_nernst_eq"]}, {"id": "n_taylor_lin", "title": "First-Order Taylor Series Linearization", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "Local linear approximation of smooth nonlinear laws around an operating point, used to linearize GHK flux into Ohmic law and evaluate Euler step accuracy.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L5", "role": "revisited"}, {"id": "L6", "role": "revisited"}], "formula": "f(x₀ + h) ≈ f(x₀) + f'(x₀)·h", "tags": ["math/physics", "model/equation"], "relatedIds": ["n_ohmic_vs_ghk", "n_first_order_ode"]}, {"id": "n_first_order_ode", "title": "First-Order Linear ODEs & Forward Euler", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "The course's signature differential equation (df/dt = −af + b) has a dissipative exponential homogeneous solution plus steady-state particular solution, solved numerically via Forward Euler when nonlinear.", "lectures": [{"id": "L1", "role": "primary"}, {"id": "L3", "role": "primary"}, {"id": "L6", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "df/dt = −af + b  ⇒  f(t) = K·e^(−at) + b/a", "tags": ["math/physics", "model/equation"], "relatedIds": ["n_rc_step", "n_stokes_drag", "n_gating_ode", "n_taylor_lin"]}, {"id": "n_molarity_avogadro", "title": "Number Density vs. Molarity (Avogadro)", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "Links particle density ρ to chemical molarity C via Avogadro's number N_A ≈ 6×10²³ mol⁻¹, enabling back-of-the-envelope counts of bulk ions inside a neuron.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "revisited"}], "formula": "ρ = N_A · C  (1 mM ≈ 6×10¹⁷ ions/cm³)", "tags": ["math/physics", "biophysics"], "relatedIds": ["n_faraday_current", "n_minimal_charge"]}, {"id": "n_coulomb_perm", "title": "Coulomb's Law, Permittivity & Quantization", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "Electrostatic forces are ~10³⁹× stronger than gravity and act on quantized ionic charges (z·e); water's high relative permittivity (ε_r ≈ 80) weakens attraction 80-fold to enable salt dissociation.", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "revisited"}], "formula": "F_e = (1 / 4πε₀ε_r) · (q₁q₂ / r²) ;  e = 1.6×10⁻¹⁹ C", "tags": ["math/physics", "biophysics"], "relatedIds": ["n_mem_capacitor", "n_debye_volcond"]}, {"id": "n_scalar_pot", "title": "Conservative Fields, Scalar Potential & Superposition", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "Normalizing force by charge defines electric field E = −∇V, reducing vector problems to scalar potential sums defined up to an arbitrary reference (V_ext = 0).", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "revisited"}, {"id": "L5", "role": "revisited"}], "formula": "E = −dV/dx ;  V = (1 / 4πε₀ε_r) Σ qᵢ/rᵢ", "tags": ["math/physics", "model/equation"], "relatedIds": ["n_drift_flux", "n_point_source_vc"]}, {"id": "n_stokes_drag", "title": "Stokes Viscous Drag & Ionic Mobility", "level": 3, "pillar": "p2", "parentId": "c2_1", "summary": "In water, viscous drag (−λv) damps ion inertia within picoseconds/nanoseconds, leaving terminal velocity instantaneously proportional to applied force (absolute mobility u = 1/λ; electrical mobility û = |z|eu).", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L4", "role": "revisited"}, {"id": "L15", "role": "revisited"}], "formula": "v_ss = u · F_ext  (u = 1/λ) ;  û = |z|·e·u", "tags": ["math/physics", "biophysics", "model/equation"], "relatedIds": ["n_teorell_flux", "n_debye_volcond", "n_first_order_ode"]}, {"id": "n_teorell_flux", "title": "Particle Flux & Teorell's Formula", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "1D molar flux J (moles crossing unit area per unit time) equals concentration times velocity; substituting overdamped mobility yields Teorell's transport law.", "lectures": [{"id": "L4", "role": "primary"}], "formula": "J = c · v = u · c · F_ext", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_stokes_drag", "n_drift_flux", "n_fick_einstein"]}, {"id": "n_faraday_current", "title": "Electric Current Density & Faraday's Constant", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "Molar ionic flux converts into electric current density via ion valence z and Faraday's constant F = N_A·e, the total charge of one mole of monovalent ions.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "I_density = z · F · J_molar ;  F = N_A · e", "tags": ["math/physics", "biophysics"], "relatedIds": ["n_molarity_avogadro", "n_drift_flux"]}, {"id": "n_drift_flux", "title": "Electrostatic Drift Flux", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "Applying Teorell's formula to the molar electrostatic force −zF(dV/dx) gives the wet-electrochemical drift flux driving cations down and anions up potential gradients.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "J_drift = −u · c · z · F · (dV/dx)", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_nernst_planck", "n_scalar_pot", "n_teorell_flux", "n_faraday_current"]}, {"id": "n_brownian_mc", "title": "Brownian Motion & Langevin Monte Carlo", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "Diffusion emerges microscopically from isotropic thermal collisions ('drunk sailor' random walk), simulated via a 2D stochastic Langevin equation with reflecting walls.", "lectures": [{"id": "L4", "role": "primary"}], "formula": "m(dv/dt) = −λv + F_stochastic", "tags": ["biophysics", "model/equation", "experiment/tool"], "relatedIds": ["n_fick_einstein", "n_markov_indep"]}, {"id": "n_fick_einstein", "title": "Chemical Potential, Fick's Law & Einstein Relation", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "Treating diffusion as a chemical-potential force (−RT d(ln c)/dx) inside Teorell's formula cancels c via the chain rule, yielding Fick's First Law and Einstein's relation D = uRT.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "J_diff = −D (dc/dx) ,  with  D = u · R · T", "tags": ["model/equation", "biophysics", "history"], "relatedIds": ["n_elem_calc", "n_nernst_planck", "n_teorell_flux", "n_brownian_mc"]}, {"id": "n_nernst_planck", "title": "Combined Nernst-Planck Electrodiffusion", "level": 3, "pillar": "p2", "parentId": "c2_2", "summary": "Summing electrical drift and chemical diffusion yields total electrodiffusive flux; setting J_tot = 0 defines single-ion thermodynamic equilibrium where mobility u cancels.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}], "formula": "J_tot = −u·c·z·F·(dV/dx) − u·R·T·(dc/dx)", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_nernst_eq", "n_ohmic_vs_ghk", "n_drift_flux", "n_fick_einstein"]}, {"id": "n_electroneutrality", "title": "Electrolytes & Local vs. Global Electroneutrality", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "Cells are aqueous multi-ion electrolytes with mobile cations/anions and fixed intracellular anions; bulk solutions remain electroneutral while tiny local charge separation at the membrane creates −70 mV.", "lectures": [{"id": "L4", "role": "primary"}], "formula": "", "tags": ["biophysics", "math/physics"], "relatedIds": ["n_minimal_charge", "n_two_comp_ext"]}, {"id": "n_helmholtz", "title": "Metal-Electrolyte Interface & Helmholtz Layer", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "A bare metal wire dipped in saline cannot directly exchange electrons with ions, forming a capacitive Helmholtz double layer (I = C dV/dt) that blocks steady DC resting potentials.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "I_interface = C_Helmholtz · (dV/dt)  (= 0 at DC)", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_ag_agcl", "n_multiscale_mod"]}, {"id": "n_ag_agcl", "title": "Reversible Ag/AgCl Electrodes & Micropipettes", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "Chlorided silver wires (Ag + Cl⁻ ⇌ AgCl + e⁻) act as ohmic 'currency exchangers' between electronic and ionic currents, paired with pulled ~1 µm borosilicate glass micropipettes and V_ext = 0 reference.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L3", "role": "revisited"}, {"id": "L5", "role": "revisited"}], "formula": "Ag + Cl⁻ ⇌ AgCl + e⁻ ;  V_m = V_in − V_ext", "tags": ["experiment/tool", "biophysics"], "relatedIds": ["n_helmholtz", "n_patch_clamp"]}, {"id": "n_fluid_mosaic", "title": "Phospholipid Bilayer & Fluid Mosaic Model", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "Amphipathic phospholipids self-assemble into an insulating bilayer separating intra- and extracellular electrolytes, hosting laterally mobile transmembrane proteins (ion channels, receptors, pumps).", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L9", "role": "revisited"}], "formula": "", "tags": ["biophysics"], "relatedIds": ["n_mem_capacitor", "n_ion_channels"]}, {"id": "n_mem_capacitor", "title": "Parallel-Plate Membrane Capacitor", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "Modeling the ~6 nm lipid bilayer (ε_r ≈ 7) as a parallel-plate capacitor explains the universal specific capacitance c_m ≈ 1 µF/cm² (and how membrane thickness was inferred before electron microscopy).", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}, {"id": "L3", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "C/A = ε₀ε_r / d ≈ 1 µF/cm² ;  I_C = C·(dV/dt)", "tags": ["biophysics", "model/equation", "experiment/tool"], "relatedIds": ["n_specific_cable", "n_minimal_charge", "n_coulomb_perm", "n_fluid_mosaic"]}, {"id": "n_minimal_charge", "title": "Minimal Charge Separation for −70 mV & Spikes", "level": 3, "pillar": "p2", "parentId": "c2_3", "summary": "By ΔQ = CΔV, establishing −70 mV or firing a 100 mV spike displaces only a minuscule fraction (~10⁶ ions) of a cell's ~50 billion bulk ions, allowing hundreds of spikes without depleting batteries.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L6", "role": "primary"}], "formula": "ΔQ/A = c_m · ΔV ≈ 7×10⁻⁸ C/cm²", "tags": ["biophysics", "math/physics"], "relatedIds": ["n_charge_budget", "n_molarity_avogadro", "n_electroneutrality", "n_mem_capacitor"]}, {"id": "n_life_death_rest", "title": "Resting State: Dynamic Steady State vs. Equilibrium", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "A living neuron at −70 mV is not at thermodynamic equilibrium (which is cell death with all fluxes zero), but at a dynamic steady state where non-zero ionic currents sum to zero (ΣI_k = 0).", "lectures": [{"id": "L3", "role": "primary"}, {"id": "L5", "role": "primary"}], "formula": "Σ I_k = 0  with  I_k ≠ 0  (maintained by ATP pumps)", "tags": ["biophysics", "math/physics"], "relatedIds": ["n_nak_pump", "n_ghk_voltage", "n_excitable_cells"]}, {"id": "n_ion_asym", "title": "Asymmetric Ion Concentrations (Squid Giant Axon)", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Extracellular fluid mirrors primordial seawater (high Na⁺, Cl⁻) while cytoplasm is rich in K⁺ and virtually devoid of free Ca²⁺ (nM–µM) so tiny Ca²⁺ influxes serve as potent second-messenger triggers.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}], "formula": "E_K ≈ −77 mV, E_Cl ≈ −69 mV, E_Na ≈ +55 mV, E_Ca ≈ +120 mV", "tags": ["biophysics", "history"], "relatedIds": ["n_nernst_eq", "n_vesicle_exo", "n_ltp_substrates"]}, {"id": "n_ion_channels", "title": "Selective Permeability & Passive Ion Channels", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Discrete transmembrane protein pores conduct specific ions passively down their electrochemical gradients using geometric/electrostatic selectivity filters and hydration-shell shedding.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}], "formula": "", "tags": ["biophysics"], "relatedIds": ["n_macro_cond", "n_channel_zoo", "n_optogenetics", "n_fluid_mosaic"]}, {"id": "n_nak_pump", "title": "Electrogenic Na⁺/K⁺-ATPase Pump", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "ATP-powered active transporter extruding 3 Na⁺ out for every 2 K⁺ imported against electrochemical gradients, preserving living ionic batteries and producing a small outward hyperpolarizing current.", "lectures": [{"id": "L4", "role": "primary"}, {"id": "L5", "role": "primary"}, {"id": "L9", "role": "revisited"}], "formula": "3 Na⁺ out : 2 K⁺ in per ATP hydrolyzed", "tags": ["biophysics"], "relatedIds": ["n_life_death_rest", "n_charge_budget"]}, {"id": "n_nernst_eq", "title": "Nernst Equilibrium & Reversal Potential", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Integrating zero-flux Nernst-Planck across the membrane yields the single-ion equilibrium battery E_ion, where mobility cancels and thermal voltage RT/F ≈ 26 mV sets the scale.", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L4", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "E_ion = (RT / zF) · ln(C_out / C_in)", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": ["n_nernst_planck", "n_hyperkalemia", "n_ohmic_vs_ghk", "n_elem_calc", "n_ion_asym"]}, {"id": "n_ohmic_vs_ghk", "title": "Ohmic Branch vs. Goldman (GHK) Flux Equation", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Relaxing equilibrium yields either the linear Ohmic resistor-battery branch I_k = g_k(V−E_k) or Goldman's constant-field nonlinear rectifying flux (crucial for Ca²⁺); Taylor linearization of GHK around E_ion recovers Ohm's law.", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L6", "role": "revisited"}], "formula": "I_k = g_k(V − E_k)  vs.  J_GHK = P·A·V·(C_out − C_in e^(AV))/(1 − e^(AV))", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_taylor_lin", "n_hh_4d", "n_equiv_circuit", "n_nernst_planck", "n_nernst_eq"]}, {"id": "n_ghk_voltage", "title": "Conductance-Weighted & Permeability GHK Resting Potential", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Setting ΣI_k = 0 gives V_rest as either a conductance-weighted average of Nernst potentials (works for any valence) or the logarithmic GHK permeability equation (monovalent ions), proving resting K⁺ conductance dominates.", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L6", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "V_rest = (Σ g_k E_k)/(Σ g_k) ;  V_GHK = (RT/F) ln[(Σ P_k C_out,k)/(Σ P_k C_in,k)]", "tags": ["model/equation", "biophysics", "history"], "relatedIds": ["n_cond_switch_ap", "n_hyperkalemia", "n_life_death_rest"]}, {"id": "n_lumped_patch", "title": "Lumped-Parameter Patch & Charge-Balance Equation", "level": 3, "pillar": "p2", "parentId": "c2_4", "summary": "Neglecting lateral bulk resistance in a small membrane patch reduces the neuron to a parallel RC circuit governed by Kirchhoff's current law (dissipative first-order ODE without inductance).", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L6", "role": "revisited"}, {"id": "L7", "role": "revisited"}], "formula": "C (dV/dt) = −Σ g_k(V − E_k) + I_ext", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_rc_step", "n_cable_pde", "n_gap_circuit", "n_modeling_popp", "n_equiv_circuit"]}, {"id": "c3_1", "title": "RC Dynamics & Action Potential Basis", "level": 2, "pillar": "p3", "parentId": "p3", "summary": "Passive RC low-pass step response, action potential phases, conductance-switching intuition, molecular Na⁺/K⁺ gating mechanics, and ionic charge budgets.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L5", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": []}, {"id": "c3_2", "title": "Kinetics, Voltage Clamp & Hodgkin-Huxley", "level": 2, "pillar": "p3", "parentId": "p3", "summary": "Mass-action kinetics, voltage-clamp feedback dissection, two-state gating ODEs, the full 4D Hodgkin-Huxley system, and multi-state Markov diagrams.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L6", "role": "revisited"}], "formula": "", "tags": ["model/equation", "experiment/tool", "history"], "relatedIds": []}, {"id": "c3_3", "title": "HH Dynamics, Excitability & Digital Twins", "level": 2, "pillar": "p3", "parentId": "p3", "summary": "Python exploration of threshold, rebound spikes, temporal integration, refractoriness, f-I curves, in silico TTX/TEA/hyperkalemia, and ion-channel diversity.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L7", "role": "revisited"}, {"id": "L9", "role": "revisited"}], "formula": "", "tags": ["analysis", "biophysics", "application"], "relatedIds": []}, {"id": "c3_4", "title": "Single-Channel Gating & Channel Noise", "level": 2, "pillar": "p3", "parentId": "p3", "summary": "Patch-clamp giga-seal recordings of quantized single-channel currents, spike-timing reliability, stochastic Markov/Monte Carlo simulation, and Langevin conductance noise.", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L10", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation", "experiment/tool"], "relatedIds": []}, {"id": "n_rc_step", "title": "Passive RC Step Response & Low-Pass Filtering", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "A current pulse charges a passive RC membrane exponentially with τ = C/G (~20 ms); capacitance resists abrupt jumps, acting as a temporal low-pass filter that smooths sharp edges.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L8", "role": "revisited"}], "formula": "V(t) = E + (I₀/G)·(1 − e^(−t/τ)) ,  τ = C/G", "tags": ["model/equation", "analysis", "math/physics"], "relatedIds": ["n_gating_lpf", "n_temp_integ", "n_ac_cable", "n_first_order_ode", "n_lumped_patch"]}, {"id": "n_ap_phases", "title": "Action Potential Phases & All-or-None Behavior", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Above threshold, excitable membranes undergo an explosive ~1–2 ms impulse featuring depolarization, overshoot past 0 mV (+30–40 mV, refuting Bernstein), repolarization, and after-hyperpolarization toward E_K.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L8", "role": "revisited"}], "formula": "Rest (−70 mV) → Overshoot (+40 mV) → AHP (−80 mV)", "tags": ["biophysics", "history"], "relatedIds": ["n_cond_switch_ap", "n_hh_4d"]}, {"id": "n_cond_switch_ap", "title": "Conductance-Switching Model of the AP", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Viewing V as a conductance-weighted average bounded between E_K and E_Na reveals the required AP sequence: rapid g_Na surge pulls V toward E_Na, then g_Na closes while delayed g_K pulls V toward E_K.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L5", "role": "revisited"}, {"id": "L7", "role": "revisited"}], "formula": "V_∞ = (g_Na E_Na + g_K E_K + g_L E_L)/(g_Na + g_K + g_L)", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_ghk_voltage", "n_na_ball_chain", "n_k_delayed", "n_ap_phases"]}, {"id": "n_hist_perm", "title": "Historical Discovery of Permeability Changes", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Traces excitability from Bernstein's selective permeability hypothesis and Cole & Curtis's conductance-increase measurement to Hodgkin & Katz's Na⁺ demonstration and Hodgkin & Huxley's voltage clamp.", "lectures": [{"id": "L5", "role": "primary"}, {"id": "L6", "role": "revisited"}, {"id": "L7", "role": "revisited"}], "formula": "", "tags": ["history", "experiment/tool"], "relatedIds": ["n_voltage_clamp", "n_galvani_volta"]}, {"id": "n_na_ball_chain", "title": "Fast-Inactivating Na⁺ Channels (Ball-and-Chain)", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Voltage-gated Na⁺ channels have a rapid activation gate ('mouth') plus an independent intracellular inactivation gate ('ball-and-chain' plug) that stops Na⁺ influx even while depolarized.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "", "tags": ["biophysics"], "relatedIds": ["n_gating_timescales", "n_rebound_ap", "n_refractory", "n_cond_switch_ap"]}, {"id": "n_k_delayed", "title": "Delayed Rectifier K⁺ vs. Cardiac Ca²⁺ Channels", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Squid axon K⁺ channels activate with a delay and lack inactivation, enabling repolarization without canceling the Na⁺ upstroke; non-inactivating Ca²⁺ channels explain long cardiac AP plateaus.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "", "tags": ["biophysics"], "relatedIds": ["n_hh_4d", "n_channel_zoo", "n_cond_switch_ap"]}, {"id": "n_charge_budget", "title": "Biological Timescales & Ionic Charge Budget", "level": 3, "pillar": "p3", "parentId": "c3_1", "summary": "Na⁺ activation (<1 ms) is the 'Ferrari of molecular machinery' between ns pore transit and slow pumps; one AP shifts only ~10⁶ ions, keeping E_Na and E_K constant over hundreds of spikes.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "revisited"}], "formula": "ΔQ = C·ΔV ≈ 5π×10⁻¹³ C  (∼10⁶ ions per spike)", "tags": ["biophysics", "analysis", "math/physics"], "relatedIds": ["n_minimal_charge", "n_nak_pump"]}, {"id": "n_mass_action", "title": "Law of Mass Action & Kinetic Schemes", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Guldberg & Waage's mass-action law translates conformational/chemical state diagrams into coupled first-order ODEs where transition rates are proportional to source state occupancies (and stoichiometric powers).", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "primary"}], "formula": "A ⇌ B  ⇒  dA/dt = −k₁A + k₂B", "tags": ["model/equation", "history", "biophysics"], "relatedIds": ["n_mass_conserv", "n_syn_2state", "n_tm_model"]}, {"id": "n_mass_conserv", "title": "Mass Conservation & Fractional State Variables", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Closed kinetic schemes conserve total channel count, reducing linear dependence and expressing states as normalized fractions in [0,1]; steady state recovers chemical equilibrium constants.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L7", "role": "revisited"}], "formula": "a + b = 1  ⇒  da/dt = −(k₁ + k₂)a + k₂", "tags": ["math/physics", "model/equation"], "relatedIds": ["n_gating_ode", "n_markov_multi", "n_mass_action"]}, {"id": "n_voltage_clamp", "title": "Voltage-Clamp Feedback Dissection", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "A closed-loop feedback amplifier holds V = V_cmd constant so capacitive current C(dV/dt) vanishes, making clamp current an exact readout of total ionic current dissectible with blockers.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L5", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "dV/dt = 0  ⇒  I_clamp(t) = I_Na + I_K + I_L", "tags": ["experiment/tool", "history"], "relatedIds": ["n_pharma_ttx_tea", "n_patch_clamp", "n_hist_perm"]}, {"id": "n_macro_cond", "title": "Macroscopic Conductance from Independent Channels", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Assuming N_tot identical independent channels of unitary conductance γ in parallel yields macroscopic conductance G = ḡ·n, linking microscopic pores to HH variables.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L9", "role": "revisited"}], "formula": "G = γ·N_open = (γ·N_tot)·n = ḡ·n", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_single_ch_quant", "n_master_eq", "n_ion_channels"]}, {"id": "n_gating_ode", "title": "Two-State Gating ODE (x_∞ & τ_x Formulation)", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Voltage-dependent opening/closing rates α(V), β(V) recast into experimentally measurable steady-state sigmoid x_∞(V) and time-constant τ_x(V) curves.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L8", "role": "revisited"}], "formula": "τ_x(V)·(dx/dt) = x_∞(V) − x ;  x_∞ = α/(α+β),  τ_x = 1/(α+β)", "tags": ["model/equation", "experiment/tool"], "relatedIds": ["n_gating_lpf", "n_gating_timescales", "n_first_order_ode", "n_mass_conserv"]}, {"id": "n_gating_lpf", "title": "Gating Equations as Low-Pass Tracking Filters", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Each gating ODE acts as a single-pole low-pass filter whose state x(t) chases the instantaneous target x_∞(V(t)) with lag τ_x.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L6", "role": "revisited"}, {"id": "L8", "role": "revisited"}], "formula": "", "tags": ["analysis", "math/physics"], "relatedIds": ["n_rc_step", "n_dim_reduction", "n_gating_ode"]}, {"id": "n_gating_timescales", "title": "Voltage Dependence & Timescale Separation (m, h, n)", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Rising sigmoids m_∞, n_∞ contrast with inverted h_∞ (~0.6 at rest, ~40% Na⁺ inactivated); fast τ_m (0.05–0.6 ms) vs. slow τ_n, τ_h (2–10 ms) creates the timescale separation needed for spiking.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L8", "role": "revisited"}], "formula": "τ_m (~0.1 ms) ≪ τ_n, τ_h (~2–10 ms) ;  h_∞(V_rest) ≈ 0.6", "tags": ["biophysics", "analysis"], "relatedIds": ["n_rebound_ap", "n_refractory", "n_dim_reduction", "n_na_ball_chain", "n_gating_ode"]}, {"id": "n_hh_4d", "title": "4D Hodgkin-Huxley ODE System (m³h, n⁴)", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Coupling membrane charge balance with three gating ODEs (3 independent activation + 1 inactivation gates for Na⁺; 4 activation gates for K⁺) quantitatively reproduces the squid giant axon AP.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L1", "role": "revisited"}, {"id": "L8", "role": "revisited"}, {"id": "L10", "role": "revisited"}], "formula": "C·dV/dt = −ḡ_Na m³h(V−E_Na) − ḡ_K n⁴(V−E_K) − g_L(V−E_L) + I_ext", "tags": ["model/equation", "history", "biophysics"], "relatedIds": ["n_markov_multi", "n_hh_python", "n_multi_gate_fact", "n_ohmic_vs_ghk", "n_ap_phases", "n_k_delayed"]}, {"id": "n_markov_multi", "title": "Multi-State Markov Channel Diagrams", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Whole-channel Markov graphs—a 5-state chain for K⁺ and an 8-state two-row diagram for Na⁺—reproduce independent-subunit powers via combinatorial rate factors (4α_n, 3α_n, ...).", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L9", "role": "revisited"}, {"id": "L10", "role": "revisited"}], "formula": "", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_hh_4d", "n_ampa_desens", "n_mass_conserv"]}, {"id": "n_dim_reduction", "title": "Quasi-Steady-State & Dimensionality Reduction", "level": 3, "pillar": "p3", "parentId": "c3_2", "summary": "Because τ_m is tiny, m(t) ≈ m_∞(V(t)) reduces 4D HH to 3D in Python, while approximate mirror symmetry h(t) ≈ 1 − n(t) motivates 2D phase-plane neuronal models.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L8", "role": "primary"}], "formula": "m(t) ≈ m_∞(V) ;  h(t) ≈ 1 − n(t)", "tags": ["analysis", "model/equation"], "relatedIds": ["n_gating_timescales", "n_tm_model", "n_gating_lpf"]}, {"id": "n_hh_python", "title": "HH Python/Colab Interactive Simulations", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Literate-programming Colab notebooks integrate the 4D HH system via Forward Euler for constant DC (`HH`) and arbitrary time-varying currents (`HH2`), comparing active, semi-passive, and RC traces.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L6", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "analysis"], "relatedIds": ["n_hh_4d", "n_neuron_sim"]}, {"id": "n_threshold_rheo", "title": "Protocol-Dependent Threshold, Rheobase & Chronaxie", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Pulse duration and slow depolarizing ramps (which inactivate h) prove there is no fixed voltage threshold; rheobase is the minimal DC current for sustained firing, while chronaxie relates to pulse duration/charge.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L16", "role": "revisited"}], "formula": "I_rheo = (V_th − E) / R ;  Q = ∫I(t)dt", "tags": ["biophysics", "analysis"], "relatedIds": ["n_fpt_fi", "n_intra_protocols"]}, {"id": "n_rebound_ap", "title": "Post-Inhibitory Rebound Action Potential", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Releasing a brief hyperpolarizing step triggers a paradoxical rebound spike because hyperpolarization resets h from ~0.6 toward 1.0 (de-inactivating Na⁺ channels) or recruits I_h currents.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L12", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "Hyperpolarization ⇒ h_∞ → 1 ⇒ transient hyperexcitability on release", "tags": ["biophysics", "analysis"], "relatedIds": ["n_gating_timescales", "n_intra_protocols", "n_spont_poisson", "n_na_ball_chain"]}, {"id": "n_temp_integ", "title": "Temporal Integration & Leaky Accumulator Model", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Periodic Dirac-delta pulses into a passive leaky integrator accumulate a steady-state baseline scaling linearly with input frequency f when T ≪ τ, explaining subthreshold pulse summation.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L7", "role": "revisited"}], "formula": "A = Δ / (e^(T/τ) − 1) ≈ Δ · f · τ  (for T ≪ τ)", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_rc_step", "n_dirac_syn"]}, {"id": "n_refractory", "title": "Absolute & Relative Refractory Periods", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Paired-pulse HH simulations separate relative refractoriness (higher threshold from residual K⁺/partial h) from absolute refractoriness (h ≈ 0, ~5–8 ms), capping maximum firing rate at 1/T_ARP.", "lectures": [{"id": "L8", "role": "primary"}], "formula": "f_max = 1 / T_ARP", "tags": ["biophysics", "analysis"], "relatedIds": ["n_fpt_fi", "n_peak_detect", "n_na_ball_chain", "n_gating_timescales"]}, {"id": "n_fi_curve", "title": "Type I vs. Type II Excitability & f-I Curve", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "The frequency-current (f-I) curve acts as a 'Rosetta Stone' mapping input strength to firing rate; Type I rises continuously from 0 Hz whereas Type II (including HH) jumps discontinuously before high-current block.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L7", "role": "revisited"}], "formula": "f = N/ΔT = 1/ISI  (HH jumps discontinuously to ~80 Hz)", "tags": ["biophysics", "analysis"], "relatedIds": ["n_fpt_fi", "n_rosetta_code", "n_dirac_syn"]}, {"id": "n_fpt_fi", "title": "First-Passage-Time RC Model of the f-I Curve", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Inverting passive RC charging to a fixed threshold V_th yields a closed-form first-passage time t*, automatically deriving rheobase and a saturating f-I curve once T_ARP is added.", "lectures": [{"id": "L8", "role": "primary"}], "formula": "t* = −τ ln[(E + RI₀ − V_th)/(RI₀)] ;  f(I₀) = 1 / (T_ARP + t*)", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_threshold_rheo", "n_refractory", "n_fi_curve"]}, {"id": "n_pharma_ttx_tea", "title": "In Silico Pharmacology (TTX, TEA) & Digital Twins", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Reducing ḡ_Na mimics pufferfish tetrodotoxin (TTX, abolishing spikes) while reducing ḡ_K mimics TEA (blocking repolarization), illustrating digital-twin testing of channelopathies without wet toxins.", "lectures": [{"id": "L6", "role": "primary"}, {"id": "L8", "role": "primary"}, {"id": "L7", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "TTX ⇔ ḡ_Na → 0 ;  TEA ⇔ ḡ_K → 0", "tags": ["application", "experiment/tool", "biophysics"], "relatedIds": ["n_voltage_clamp", "n_excitable_cells", "n_ext_noise"]}, {"id": "n_hyperkalemia", "title": "Hyperkalemia & Epileptiform Firing", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Elevating extracellular [K⁺] shifts E_K less negative (e.g., −77 → −60 mV), depolarizing V_rest into m_∞ activation and triggering spontaneous ~90 Hz epileptiform firing at I_ext = 0.", "lectures": [{"id": "L8", "role": "primary"}], "formula": "↑[K⁺]_out ⇒ E_K: −77 → −60 mV ⇒ spontaneous ~90 Hz firing", "tags": ["application", "biophysics", "experiment/tool"], "relatedIds": ["n_nernst_eq", "n_epilepsy_sync", "n_ghk_voltage"]}, {"id": "n_channel_zoo", "title": "Ion Channel Zoo & Spike-Frequency Adaptation", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Beyond squid Na⁺/K⁺, neurons express diverse channels (Kv2/Kv3, persistent Na⁺, I_A, M-current, I_h, AHP K⁺) producing bursting, cumulative Na⁺ inactivation, and two-timescale spike-frequency adaptation.", "lectures": [{"id": "L8", "role": "primary"}, {"id": "L9", "role": "primary"}, {"id": "L13", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "τ_fast ≈ 10–20 ms, τ_slow ≈ 100–200 ms adaptation", "tags": ["biophysics", "analysis"], "relatedIds": ["n_up_down_osc", "n_intra_protocols", "n_buzsaki_rec", "n_receptive_fields", "n_spont_poisson", "n_ion_channels", "n_k_delayed"]}, {"id": "n_ipsc_maturation", "title": "Human iPSC Cortical Neuron Maturation", "level": 3, "pillar": "p3", "parentId": "c3_3", "summary": "Patch recordings of GFP-labeled human iPSC neurons transplanted into mouse cortex (Daniele Linaro) show ~9 months are needed to reach mature Na⁺ density, AP overshoot, and synaptic integration.", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L13", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "application", "biophysics"], "relatedIds": ["n_glial_scar", "n_buzsaki_rec"]}, {"id": "n_patch_clamp", "title": "Patch-Clamp Technique & Giga-Seal Modes", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Neher & Sakmann's Nobel method presses a ~1 µm glass pipette onto the membrane to form a GΩ seal (cell-attached), enabling whole-cell, inside-out, and outside-out configurations.", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L10", "role": "revisited"}, {"id": "L12", "role": "revisited"}], "formula": "GΩ seal ⇒ leak current I → 0, high SNR", "tags": ["experiment/tool", "history"], "relatedIds": ["n_ag_agcl", "n_multipatch", "n_voltage_clamp"]}, {"id": "n_single_ch_quant", "title": "Quantized Single-Channel Currents", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Single-channel voltage clamp reveals random binary current jumps (~2–6 pA) in integer multiples; averaging hundreds of stochastic trials recovers smooth deterministic macroscopic Na⁺ and K⁺ currents.", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L7", "role": "revisited"}], "formula": "Unitary ~2 pA jumps → ensemble average = smooth macroscopic I(t)", "tags": ["biophysics", "experiment/tool", "analysis"], "relatedIds": ["n_macro_cond", "n_master_eq"]}, {"id": "n_noise_feature", "title": "Biological Noise as Feature vs. Bug", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Thermal agitation drives stochastic gating and spontaneous vesicle release (Aldo Faisal), causing spike failures and latency jitter near rheobase while potentially aiding weak-signal detection and exploration.", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L10", "role": "revisited"}], "formula": "", "tags": ["biophysics", "application"], "relatedIds": ["n_spont_poisson", "n_spike_reliability"]}, {"id": "n_spike_reliability", "title": "Stimulus-Dependent Spike-Timing Reliability", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Mainen & Sejnowski showed DC current steps cause accumulating spike-timing jitter across trials, whereas frozen fluctuating currents restore sub-ms precision (with interneurons showing lower jitter than pyramidal cells).", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L10", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "biophysics", "analysis"], "relatedIds": ["n_multi_gate_fact", "n_langevin_ch", "n_noise_feature"]}, {"id": "n_markov_indep", "title": "Microscopic Markov Channels & Monte Carlo Simulation", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Each independent channel is a memoryless Markov automaton; single-channel trajectories are simulated without ODEs by comparing uniform random numbers R ~ U(0,1) against rate·Δt at each step.", "lectures": [{"id": "L7", "role": "primary"}, {"id": "L9", "role": "primary"}], "formula": "P(transition in Δt) ≈ k·Δt  (flip state if rand() < k·Δt)", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_brownian_mc", "n_master_eq", "n_modeling_popp"]}, {"id": "n_master_eq", "title": "Master Equation & Bernoulli 1/√N Scaling", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Deriving state occupancy probability P_A(t) recovers the deterministic gating ODE, while Bernoulli statistics prove ensemble variance scales as 1/N_tot (noisier in small nodes of Ranvier than large somata).", "lectures": [{"id": "L9", "role": "primary"}, {"id": "L10", "role": "revisited"}], "formula": "E[n] = x̄ ;  Var(n) = x̄(1−x̄)/N_tot  (SD ∝ 1/√N_tot)", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_langevin_ch", "n_single_ch_quant", "n_macro_cond", "n_markov_indep"]}, {"id": "n_multi_gate_fact", "title": "Multi-Gate Factorization (n⁴, m³h)", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "Independent binary subunit gates factorize as E[∏S_j] = n⁴ or m³h; voltage dependence of x̄(1−x̄) explains why DC depolarization maximizes noise variance while hyperpolarizing fluctuations suppress it.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L7", "role": "revisited"}, {"id": "L9", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": ["n_hh_4d", "n_spike_reliability"]}, {"id": "n_langevin_ch", "title": "Langevin Diffusion Approximation for Channel Noise", "level": 3, "pillar": "p3", "parentId": "c3_4", "summary": "For large N, binomial channel fluctuations are approximated by colored Gaussian conductance noise (zero-clipped), matching exact Markovian latency, jitter, and reliability far better than Fox's gating SDE.", "lectures": [{"id": "L10", "role": "primary"}], "formula": "n(t) ≈ x̄(t) + σ(V)·ξ(t)  [colored conductance noise]", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_master_eq", "n_spike_reliability"]}, {"id": "c4_1", "title": "Electrical Synapses & Connectomics", "level": 2, "pillar": "p4", "parentId": "p4", "summary": "Bidirectional connexin gap junctions, Golgi vs. Cajal historical debate, electrical synchronization circuits, AC chirp disambiguation, and multi-patch connectomics.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool", "model/equation"], "relatedIds": []}, {"id": "c4_2", "title": "Chemical Synapses & Receptor Models", "level": 2, "pillar": "p4", "parentId": "p4", "summary": "Vesicle exocytosis, ionotropic vs. metabotropic taxonomy, shunting inhibition, 2-state and 5-state AMPA desensitization, NMDA Mg²⁺ block, GABA_B cascades, and Dirac-delta synapses.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": []}, {"id": "c4_3", "title": "Short-Term Plasticity & Network Oscillations", "level": 2, "pillar": "p4", "parentId": "p4", "summary": "Homosynaptic STD/STF, target-cell specificity, Dale's law, the Tsodyks-Markram kinetic model, synaptic temporal filtering, emergent Up/Down oscillations, and epilepsy.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L12", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "analysis"], "relatedIds": []}, {"id": "c4_4", "title": "Long-Term Plasticity, STDP & Cortical Motifs", "level": 2, "pillar": "p4", "parentId": "p4", "summary": "Cellular/structural LTP substrates, Hebb's postulate, Bliss & Lømo hippocampal LTP, pairwise and triplet STDP, cortical connectivity motifs, and LTP–STP filter interaction.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "history"], "relatedIds": []}, {"id": "n_elec_vs_chem", "title": "Electrical vs. Chemical Synaptic Transmission", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "Electrical gap junctions are fast, bidirectional, unsigned ohmic bridges; chemical synapses are unidirectional, signed relays ('Ferrari of communication') enabling digital-like regeneration and plasticity.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "revisited"}], "formula": "", "tags": ["biophysics", "application"], "relatedIds": ["n_gap_circuit", "n_vesicle_exo"]}, {"id": "n_golgi_cajal", "title": "Reticular Theory vs. Neuron Doctrine & Connectomics", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "Contrasts Camillo Golgi's continuous syncytium (partially vindicated by gap junctions) with Ramón y Cajal's discrete Neuron Doctrine, leading to modern EM 3D connectomics and 'connectopathies'.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L1", "role": "revisited"}], "formula": "", "tags": ["history", "biophysics", "experiment/tool"], "relatedIds": ["n_multipatch", "n_modeldb_morph"]}, {"id": "n_gap_circuit", "title": "Gap-Junction Circuit & Paired Recordings", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "Dual recordings in cortical LTS interneurons show attenuated spikelets and bidirectional hyperpolarization; modeled by an ohmic resistor R_gap linking intracellular nodes with opposite-sign coupling currents.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "primary"}], "formula": "I_gap = ± g_gap · (V₁ − V₂)", "tags": ["model/equation", "experiment/tool", "biophysics"], "relatedIds": ["n_lumped_patch", "n_gap_sync", "n_elec_vs_chem"]}, {"id": "n_gap_sync", "title": "Gap-Junction Synchronization & Inhibitory Braking", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "Gap-junction currents vanish at V₁ = V₂ and pull mismatched oscillators into synchrony—coordinating cardiac contraction and forming a fast synchronous inhibitory interneuron brake against seizures.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L13", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_epilepsy_sync", "n_target_spec", "n_gap_circuit"]}, {"id": "n_chirp_phase", "title": "DC Resistive Ambiguity vs. AC Chirp Phase-Shift", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "At DC, a weak direct gap junction looks identical to a multi-cell chain; sweeping a sinusoidal chirp f(t) = f₀ + αt exploits the 90° high-frequency capacitive phase lag per stage to disambiguate distance.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L14", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "I(t) ∝ sin(2π(f₀ + αt)t) ;  −90° phase lag per RC stage", "tags": ["experiment/tool", "analysis", "math/physics"], "relatedIds": ["n_sinusoid_dim", "n_intra_protocols"]}, {"id": "n_multipatch", "title": "Multi-Patch Functional-Anatomical Connectomics", "level": 3, "pillar": "p4", "parentId": "c4_1", "summary": "Simultaneous multi-pipette whole-cell recordings (testing N(N−1) ordered pairs under DIC microscopy) establish causal monosynaptic EPSPs (~0.2 mV), overcoming fMRI's correlation-vs-causation limit.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "N pipettes ⇒ N(N−1) ordered pairs tested", "tags": ["experiment/tool", "analysis"], "relatedIds": ["n_patch_clamp", "n_triplet_stdp", "n_golgi_cajal"]}, {"id": "n_vesicle_exo", "title": "Presynaptic Vesicle Exocytosis ('Kiss-and-Run')", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Presynaptic APs open voltage-gated Ca²⁺ channels; Ca²⁺ influx triggers synapsin-anchored vesicles to fuse, release transmitter across the ~tens-of-nm cleft (0.1–0.5 ms delay), and recycle.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "revisited"}], "formula": "Synaptic delay ≈ 0.1–0.5 ms", "tags": ["biophysics"], "relatedIds": ["n_ion_asym", "n_std_stf", "n_elec_vs_chem"]}, {"id": "n_epsp_shunting", "title": "EPSP/IPSP & Shunting Inhibition", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Excitatory vs. inhibitory sign depends on E_syn relative to V_rest; when E_Cl ≈ V_rest (GABA_A), opening channels barely shifts V yet drops R_m and τ_m, divisively vetoing concurrent excitation (shunting).", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L14", "role": "revisited"}, {"id": "L15", "role": "revisited"}], "formula": "I_Cl = g_GABA(V − E_Cl) ≈ 0  at rest,  but  τ_m = C_m / g_tot ↓", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_shunting_dend", "n_ionotropic_meta"]}, {"id": "n_ionotropic_meta", "title": "Ionotropic vs. Metabotropic Receptors", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Ionotropic receptors are fast (<1 ms 'panic-bar') ligand-gated pores (AMPA, NMDA, AChR, GABA_A, glycine); metabotropic receptors (mGluR, GABA_B) trigger slow (100–200 ms) G-protein signaling cascades.", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_gabab_model", "n_nmda_mg", "n_epsp_shunting"]}, {"id": "n_syn_2state", "title": "Ohmic Synaptic Conductance & 2-State Kinetic Model", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Chemical synapses enter the membrane circuit as I_syn = ḡ_syn·O(t)·(V − E_syn); a 2-state C ⇌ O model with rate α[T] captures receptor saturation (O_∞ ≤ 1), fast rise, and exponential decay exp(−βt).", "lectures": [{"id": "L10", "role": "primary"}, {"id": "L11", "role": "revisited"}], "formula": "dO/dt = α[T](1−O) − βO ;  τ_decay = 1/β", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_mass_action", "n_dirac_syn"]}, {"id": "n_ampa_desens", "title": "Multi-State AMPA Model & Postsynaptic Desensitization", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "A 5-state AMPA scheme (C₀ ⇌ C₁ ⇌ C₂ ⇌ O plus desensitized state D) explains why rapid 50 Hz stimulation depresses peak EPSCs purely via postsynaptic receptor desensitization.", "lectures": [{"id": "L10", "role": "primary"}], "formula": "", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_markov_multi", "n_std_stf"]}, {"id": "n_nmda_mg", "title": "NMDA Receptor Mg²⁺ Block & Coincidence Detection", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Extracellular Mg²⁺ plugs the NMDA pore at rest and is expelled only by postsynaptic depolarization; requiring both glutamate and depolarization makes NMDA a Ca²⁺-permeable molecular AND gate for memory.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L14", "role": "revisited"}], "formula": "g_NMDA(V, [Mg²⁺]_o): sigmoidal voltage relief; Ca²⁺-permeable", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_hebb_ltp", "n_bac_firing", "n_dend_spines", "n_ionotropic_meta", "n_ltp_substrates"]}, {"id": "n_gabab_model", "title": "Multi-Step Metabotropic (GABA_B) Kinetic Model", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Coupling receptor binding/desensitization, G-protein activation, and cooperative K⁺-channel opening yields 6 coupled 1st-order ODEs that naturally explain GABA_B's slow latency and 100–200 ms inertia.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L10", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics"], "relatedIds": ["n_ionotropic_meta"]}, {"id": "n_dirac_syn", "title": "Dirac-Delta Synapse & Frequency-to-Amplitude Conversion", "level": 3, "pillar": "p4", "parentId": "c4_2", "summary": "Modeling spike trains as Dirac deltas T_max Σδ(t−t_k) yields exponential impulse responses whose steady-state peak scales linearly with firing rate—making synapses frequency-to-amplitude converters.", "lectures": [{"id": "L11", "role": "primary"}], "formula": "dO/dt = −βO + αT_max Σδ(t−t_k)  ⇒  O_peak ∝ f · αT_max / β", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_temp_integ", "n_fi_curve", "n_syn_2state"]}, {"id": "n_std_stf", "title": "Homosynaptic Short-Term Plasticity (STD vs. STF)", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Transient (hundreds of ms) presynaptic modulation: short-term depression (STD) stems from vesicle depletion/slow replenishment (τ_rec ~ 500–1000 ms), while facilitation (STF) stems from residual presynaptic Ca²⁺.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L10", "role": "revisited"}, {"id": "L12", "role": "revisited"}], "formula": "τ_rec ≈ 500–1000 ms", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_tm_model", "n_ampa_desens", "n_vesicle_exo"]}, {"id": "n_target_spec", "title": "Target-Cell Specificity & Cortical E-I Stability", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Triple-patch experiments (Markram & Tsodyks) showed one pyramidal cell forms depressing (STD) synapses onto other pyramidal cells (damping avalanches) yet facilitating (STF) synapses onto Martinotti interneurons.", "lectures": [{"id": "L11", "role": "primary"}], "formula": "Pyr → Pyr (STD)  vs.  Pyr → Martinotti Interneuron (STF)", "tags": ["experiment/tool", "biophysics"], "relatedIds": ["n_up_down_osc", "n_gap_sync"]}, {"id": "n_dales_law", "title": "Dale's Law & Disynaptic Inhibition", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Vertebrate neurons release the same transmitter (excitatory or inhibitory) at all outputs, constraining synaptic weight signs unlike ML; circuits invert sign via disynaptic inhibition (E → I → target).", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "sign(w_ij) = sign(w_kj) for all targets of neuron j", "tags": ["biophysics", "application"], "relatedIds": ["n_stdp"]}, {"id": "n_tm_model", "title": "Tsodyks-Markram (R-E-I) Model & QSS Reduction", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Partitions presynaptic resources into Recovered (R), Effective (E), and Inactive (I) pools (R+E+I=1); timescale separation (τ_inact ≪ τ_rec) collapses it into a single ODE for R(t) with step drops UR.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "dR/dt = (1 − R)/τ_rec − U·R Σδ(t − t_k)", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": ["n_std_stf", "n_syn_filter", "n_ltp_stp_inter", "n_mass_action", "n_dim_reduction", "n_up_down_osc"]}, {"id": "n_syn_filter", "title": "Synapses as Activity-Dependent Temporal Filters", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Combining STD/STF with periodic input makes synaptic gain frequency-dependent: across frequency bands, one synapse can act as a low-pass integrator, linear relay, or high-pass change detector.", "lectures": [{"id": "L11", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["analysis", "model/equation", "application"], "relatedIds": ["n_tm_model", "n_ltp_stp_inter"]}, {"id": "n_up_down_osc", "title": "Emergent Up/Down Oscillations & MEA Bursting", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Recurrent cortical excitation triggers population avalanches self-terminated by STD and adaptation, producing ~0.5–1 Hz slow-wave Up/Down states in vivo (mPFC) and synchronous bursts on 2D CMOS/glass MEAs.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "experiment/tool"], "relatedIds": ["n_tm_model", "n_channel_zoo", "n_buzsaki_rec", "n_target_spec"]}, {"id": "n_epilepsy_sync", "title": "Epilepsy as Runaway Synchronization & Seizures", "level": 3, "pillar": "p4", "parentId": "c4_3", "summary": "Frames seizures as unstable positive feedback and oscillator phase-locking (coupled metronomes), contrasting generalized tonic-clonic, focal motor, and thalamocortical spike-and-wave absence seizures.", "lectures": [{"id": "L2", "role": "primary"}, {"id": "L1", "role": "revisited"}, {"id": "L8", "role": "revisited"}, {"id": "L12", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "application", "analysis"], "relatedIds": ["n_hyperkalemia", "n_dbs_adbs", "n_epileptic_colab", "n_shannon_signal", "n_homunculus", "n_optogenetics", "n_gap_sync"]}, {"id": "n_ltp_substrates", "title": "Cellular & Structural Substrates of LTP/LTD", "level": 3, "pillar": "p4", "parentId": "c4_4", "summary": "Persistent synaptic strength changes arise from NMDA/Ca²⁺-driven postsynaptic receptor insertion (ḡ_syn), presynaptic release (U, T_max), phosphorylation (γ), unsilencing deaf/mute synapses, and spine growth.", "lectures": [{"id": "L12", "role": "primary"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_dend_spines", "n_nmda_mg", "n_ltp_stp_inter", "n_ion_asym"]}, {"id": "n_hebb_ltp", "title": "Hebbian Learning & Hippocampal LTP (Bliss & Lømo)", "level": 3, "pillar": "p4", "parentId": "c4_4", "summary": "Donald Hebb's co-activation postulate ('fire together, wire together') was verified by Bliss & Lømo in hippocampal CA3–CA1 slices: 50–100 Hz tetani induce persistent NMDA-dependent LTP (blocked by AP5).", "lectures": [{"id": "L12", "role": "primary"}], "formula": "Δw_ij ∝ x_pre · x_post  (blocked by AP5)", "tags": ["history", "experiment/tool", "biophysics"], "relatedIds": ["n_nmda_mg", "n_stdp"]}, {"id": "n_stdp", "title": "Spike-Timing-Dependent Plasticity (STDP)", "level": 3, "pillar": "p4", "parentId": "c4_4", "summary": "Causal pre-before-post timing (Δt > 0, tens of ms) induces LTP while post-before-pre (Δt < 0) induces LTD (larger LTD area stabilizes recurrent networks), signaled to spines by backpropagating APs.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L14", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "Δt = t_post − t_pre :  Δt > 0 ⇒ LTP ,  Δt < 0 ⇒ LTD", "tags": ["biophysics", "experiment/tool", "application"], "relatedIds": ["n_bap", "n_democ_stdp", "n_triplet_stdp", "n_neuromorphic", "n_dales_law", "n_hebb_ltp"]}, {"id": "n_triplet_stdp", "title": "Triplet STDP, Frequency & Cortical Motifs", "level": 3, "pillar": "p4", "parentId": "c4_4", "summary": "Multi-patch recordings (Sjöström) and triplet/voltage models (Pfister-Gerstner, Clopath) show low-frequency STDP eliminates bidirectional motifs (barrel cortex) whereas >35 Hz pairing sustains them (visual cortex).", "lectures": [{"id": "L12", "role": "primary"}], "formula": "Independent bidirectional null: p² = 0.01 vs. observed motifs", "tags": ["model/equation", "experiment/tool", "analysis"], "relatedIds": ["n_multipatch", "n_stdp"]}, {"id": "n_ltp_stp_inter", "title": "Interaction of LTP and STP (Buonomano)", "level": 3, "pillar": "p4", "parentId": "c4_4", "summary": "Postsynaptic LTP (↑ḡ_syn, hippocampus) uniformly scales all EPSPs preserving integrator filtering, whereas presynaptic LTP (↑U, cortex) boosts the 1st EPSP and deepens STD, creating a high-pass onset detector.", "lectures": [{"id": "L12", "role": "primary"}], "formula": "↑ḡ_syn ⇒ uniform scaling ;  ↑U ⇒ stronger 1st EPSP + deeper STD", "tags": ["biophysics", "analysis", "model/equation"], "relatedIds": ["n_tm_model", "n_syn_filter", "n_ltp_substrates"]}, {"id": "c5_1", "title": "Passive Cable Equation & Analytical Solutions", "level": 2, "pillar": "p5", "parentId": "p5", "summary": "Kelvin & Rall's distributed ladder network, specific parameters, cable PDE derivation, λ and τ_m, boundary conditions, and steady-state semi-infinite, finite, and doubly infinite solutions.", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": []}, {"id": "c5_2", "title": "AC Filtering, Transients & Geometry", "level": 2, "pillar": "p5", "parentId": "p5", "summary": "Crank-Nicolson and NEURON compartmental simulations, frequency-dependent λ_AC(ω) low-pass filtering, Gaussian transients, tapered asymmetry, functional subunits, and Rall's ball-and-stick.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["model/equation", "biophysics", "experiment/tool"], "relatedIds": []}, {"id": "c5_3", "title": "Active Dendrites & Single-Neuron Computation", "level": 2, "pillar": "p5", "parentId": "p5", "summary": "Backpropagating APs, BAC Ca²⁺ coincidence detection, hippocampal dendritic democracy and its clash with STDP, shunting summation, dendritic spines, and the single neuron as a deep network.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L15", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "experiment/tool"], "relatedIds": []}, {"id": "n_kelvin_rall", "title": "Origins of Cable Theory (Kelvin & Rall)", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Adapted by Wilfrid Rall from Lord Kelvin's submarine telegraph equation to resolve his debate with John Eccles, proving slow somatic EPSPs arise from electrotonic filtering of distal synapses.", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L14", "role": "revisited"}], "formula": "", "tags": ["history", "biophysics"], "relatedIds": ["n_cable_transient", "n_rall_ball_stick"]}, {"id": "n_specific_cable", "title": "Specific Membrane & Axial Parameters", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Continuous spatial PDEs normalize electrical properties by area or length: specific capacitance c_m ≈ 1 µF/cm², membrane resistance r_m ≈ 20 kΩ·cm², and cytoplasmic axial resistivity r_i.", "lectures": [{"id": "L13", "role": "primary"}], "formula": "c_m ≈ 1 µF/cm², r_m ≈ 20 kΩ·cm² ;  τ_m = r_m·c_m", "tags": ["biophysics", "math/physics"], "relatedIds": ["n_mem_capacitor", "n_lambda_tau"]}, {"id": "n_cable_pde", "title": "1D Ladder Network & Passive Cable PDE", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Applying KCL, Ohm's law, and 2nd-order spatial Taylor expansion to a cylindrical RC ladder (isopotential exterior, zero inductance) yields the linear diffusion-type passive cable PDE.", "lectures": [{"id": "L13", "role": "primary"}], "formula": "λ² (∂²v / ∂x²) = v + τ_m (∂v / ∂t)", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_lumped_patch", "n_lambda_tau", "n_ac_cable"]}, {"id": "n_lambda_tau", "title": "Space Constant (λ) & Time Constant (τ_m)", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Dimensional symmetry defines the steady-state decay length λ (scaling with √radius and √(r_m/r_i), ~1000 µm for a 2 µm dendrite) alongside area-independent τ_m = r_m c_m (~20–50 ms).", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L14", "role": "revisited"}], "formula": "λ = √(a·r_m / 2r_i) ;  τ_m = r_m · c_m", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": ["n_ac_cable", "n_taper_asym", "n_specific_cable", "n_cable_pde"]}, {"id": "n_cable_bc", "title": "Cable Boundary Conditions", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Unique cable solutions require an initial condition plus two spatial boundary conditions: sealed end (∂v/∂x = 0, von Neumann), killed end (v = 0, Dirichlet), terminated end, or voltage/current clamp.", "lectures": [{"id": "L13", "role": "primary"}], "formula": "Sealed: ∂v/∂x|_L = 0 ;  Killed: v(L) = 0", "tags": ["math/physics", "model/equation"], "relatedIds": ["n_semi_inf_cable", "n_finite_cable"]}, {"id": "n_semi_inf_cable", "title": "Semi-Infinite Cable & Input Resistance (R_∞)", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "At DC steady state (∂v/∂t = 0), boundedness as x → ∞ selects pure exponential decay v(x) = R_∞ I₀ e^(−x/λ) (dropping to 36% at x = λ), creating 'anti-democratic' attenuation of distal synapses.", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L14", "role": "revisited"}], "formula": "v(x) = R_∞ · I₀ · exp(−x/λ)", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_dend_democracy", "n_finite_cable", "n_cable_bc"]}, {"id": "n_finite_cable", "title": "Finite (Hyperbolic) & Doubly Infinite Cables", "level": 3, "pillar": "p5", "parentId": "c5_1", "summary": "Finite sealed cables obey hyperbolic cosh/sinh decay (nearly isopotential for L ≪ λ; semi-infinite for L ≳ 2–3λ), while central Dirac injection into a doubly infinite cable splits current symmetrically (½ R_∞).", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L14", "role": "revisited"}], "formula": "Finite: v(x) ∝ cosh((L−x)/λ)/sinh(L/λ) ;  Inf: ½ R_∞ I₀ e^(−|x|/λ)", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_neuron_sim", "n_semi_inf_cable", "n_cable_bc"]}, {"id": "n_neuron_sim", "title": "Crank-Nicolson Solvers & NEURON Simulator", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "Implicit Crank-Nicolson schemes overcome explicit Euler stability limits; the Python/NEURON simulator discretizes morphological sections to test passive/active cables against analytical theory.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "model/equation", "math/physics"], "relatedIds": ["n_finite_cable", "n_modeldb_morph", "n_hh_python"]}, {"id": "n_ac_cable", "title": "AC Cable Equation & Effective Space Constant λ_AC(ω)", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "Fourier-transforming the cable PDE gives a complex λ*(ω) = λ/√(1 + jωτ_m); the real effective length λ_AC(ω) shrinks with frequency ('accordion effect'), making dendrites low-pass filters that attenuate fast AMPA more than slow NMDA.", "lectures": [{"id": "L14", "role": "primary"}], "formula": "λ*(ω) = λ / √(1 + jωτ_m)  ⇒  λ_AC(ω) ↓ with frequency", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_cable_pde", "n_rc_step", "n_bap", "n_sinusoid_dim", "n_lambda_tau"]}, {"id": "n_cable_transient", "title": "Transient Impulse Response & Electrotonic Velocity", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "A spatiotemporal Dirac impulse spreads as a decaying Gaussian (heat/diffusion kernel) with effective peak speed v_eff ≈ 2λ/τ_m (not a d'Alembert wave), reproducing Rall's somatic rise-time vs. half-width relation.", "lectures": [{"id": "L14", "role": "primary"}], "formula": "v(x,t) ∝ (e^(−t/τ_m)/√(t/τ_m))·exp(−x²/(4λ²t/τ_m)) ;  v_eff ≈ 2λ/τ_m", "tags": ["model/equation", "math/physics", "biophysics"], "relatedIds": ["n_kelvin_rall", "n_active_myelin"]}, {"id": "n_taper_asym", "title": "Electrotonic Compactness & Tapered Asymmetry", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "Thicker dendrites have larger λ and are electrotonically more compact; tapering narrows distal branches (raising local input resistance), making voltage attenuation much steeper dendrite→soma than soma→dendrite.", "lectures": [{"id": "L14", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_lambda_tau", "n_dend_spines"]}, {"id": "n_syn_territories", "title": "Functional Subunits (Synaptic Territories)", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "NEURON attenuation maps on digitized layer-5 pyramidal trees reveal minimal attenuation within sibling branches vs. steep attenuation toward the soma, partitioning dendrites into semi-independent subunits.", "lectures": [{"id": "L14", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_neuron_dnn", "n_modeldb_morph"]}, {"id": "n_rall_ball_stick", "title": "Rall's Equivalent Cylinder (Ball-and-Stick) & d^(3/2) Law", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "A passive branched dendritic tree collapses exactly into a single soma plus equivalent cylinder ('ball-and-stick') for distal-to-soma attenuation when branch diameters satisfy Rall's 3/2-power law.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L15", "role": "revisited"}], "formula": "d_parent^(3/2) = Σ d_daughter,i^(3/2)", "tags": ["model/equation", "math/physics", "history"], "relatedIds": ["n_kelvin_rall", "n_spike_morph"]}, {"id": "n_modeldb_morph", "title": "Digitized 3D Morphologies & Open Science (ModelDB)", "level": 3, "pillar": "p5", "parentId": "c5_2", "summary": "Public repositories like ModelDB provide microscopically traced 3D pyramidal morphologies (thousands of coupled ODEs) for reproducible NEURON/LFPy simulations of distributed synapses and bAPs.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L14", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "application"], "relatedIds": ["n_neuron_sim", "n_golgi_cajal", "n_syn_territories"]}, {"id": "n_bap", "title": "Backpropagating Action Potentials (bAPs)", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Dual somatodendritic patch recordings (Greg Stuart, Sakmann lab) revealed that somatic/AIS spikes actively retropropagate into dendrites as attenuated, delayed waves, reporting postsynaptic firing for STDP.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool", "history"], "relatedIds": ["n_stdp", "n_bac_firing", "n_ac_cable"]}, {"id": "n_bac_firing", "title": "BAC Firing & Ca²⁺ Spike Coincidence Detection", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Matthew Larkum showed that coincidence of a somatic bAP with distal excitation recruits non-inactivating dendritic Ca²⁺ hotspots, igniting a regenerative Ca²⁺ spike and somatic AP burst (supralinear summation).", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L15", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_bap", "n_nmda_mg", "n_neuron_dnn", "n_active_myelin"]}, {"id": "n_dend_democracy", "title": "Dendritic Democracy vs. Strategic Placement", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Unlike passive attenuation (exploited by chandelier cells vetoing the AIS), hippocampal CA1 pyramidal cells achieve 'dendritic democracy' (Häusser): higher distal synaptic conductances equalize somatic EPSPs.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L16", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_semi_inf_cable", "n_democ_stdp"]}, {"id": "n_democ_stdp", "title": "Dendritic Democracy–STDP Interaction (Gidon & Segev)", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Albert Gidon & Idan Segev demonstrated that standard competitive STDP (larger LTD area, 'rich-get-richer') destroys distal synapses even under initial dendritic democracy unless distal saturation caps are raised.", "lectures": [{"id": "L16", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_dend_democracy", "n_stdp"]}, {"id": "n_shunting_dend", "title": "Conductance-Based Shunting & Sublinear Summation", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Because real synapses change membrane conductance (I_syn = g_syn(V−E_syn)), co-localized excitatory inputs sum sublinearly and on-path GABAergic shunting locally lowers R_m to veto distal EPSPs.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L10", "role": "revisited"}, {"id": "L15", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_epsp_shunting", "n_lfp_biophysics"]}, {"id": "n_dend_spines", "title": "Dendritic Spines as Electrical & Ca²⁺ Compartments", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "High-resistance spine necks amplify local synaptic voltage and biochemically confine NMDA-mediated Ca²⁺ transients (visualized with GECIs), enabling synapse-specific long-term plasticity.", "lectures": [{"id": "L14", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["biophysics", "experiment/tool"], "relatedIds": ["n_ltp_substrates", "n_taper_asym", "n_nmda_mg"]}, {"id": "n_neuron_dnn", "title": "Single Neuron as a Deep Neural Network", "level": 3, "pillar": "p5", "parentId": "c5_3", "summary": "Sigmoidal supralinear dendritic branch nonlinearities (Ca²⁺ + NMDA) allow a single cortical pyramidal neuron to approximate a multi-layer or deep neural network (Poirazi; Idan Segev), far exceeding a point perceptron.", "lectures": [{"id": "L14", "role": "primary"}], "formula": "", "tags": ["model/equation", "application", "biophysics"], "relatedIds": ["n_syn_territories", "n_bac_firing", "n_neuromorphic", "n_visual_pathway"]}, {"id": "c6_1", "title": "Volume Conduction & Biophysical Origins", "level": 2, "pillar": "p6", "parentId": "p6", "summary": "Simultaneous intra/extracellular recordings (−dV/dt), two-compartment origin of V_e, Debye shielding, forward point-source volume conduction, CSD inverse problem, and multiscale modalities.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L13", "role": "primary"}, {"id": "L15", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation", "math/physics"], "relatedIds": []}, {"id": "c6_2", "title": "Extracellular Spikes, MUA & LFP Biophysics", "level": 2, "pillar": "p6", "parentId": "p6", "summary": "Morphological and spectral determinants of extracellular spikes, myelination vs. active dendrites, MUA population-rate power laws, LFP dipole ambiguity, and LFP/MUA decomposition.", "lectures": [{"id": "L13", "role": "primary"}, {"id": "L15", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["biophysics", "model/equation", "analysis"], "relatedIds": []}, {"id": "c6_3", "title": "Neural Probes, Digitization & Filtering", "level": 2, "pillar": "p6", "parentId": "p6", "summary": "Hardware evolution from microwires to active CMOS Neuropixels, Shannon-Nyquist sampling and quantization, causal vs. zero-phase filtering artifacts, and robust MAD noise estimation.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L16", "role": "primary"}], "formula": "", "tags": ["experiment/tool", "analysis"], "relatedIds": []}, {"id": "c6_4", "title": "Spike Detection, Sorting & Practical Analysis", "level": 2, "pillar": "p6", "parentId": "p6", "summary": "Threshold-crossing peak detection, PCA/wavelet feature extraction, unsupervised clustering and inverse-problem limits, active intracellular protocols, and epileptic slice MEA analysis.", "lectures": [{"id": "L16", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["analysis", "experiment/tool", "application"], "relatedIds": []}, {"id": "n_buzsaki_rec", "title": "Simultaneous Intra–Extracellular Recording (−dV/dt)", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Simultaneous patch + tetrode/probe recordings (Buzsáki, Couto, Moskalyuk) prove extracellular spikes (~10–50 µV) mirror −dV_intra/dt during the upstroke and track Up/Down states and burst slope decline.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L13", "role": "primary"}], "formula": "V_e(t) ∝ −dV_intra / dt", "tags": ["experiment/tool", "biophysics", "history"], "relatedIds": ["n_two_comp_ext", "n_up_down_osc", "n_ipsc_maturation", "n_channel_zoo"]}, {"id": "n_two_comp_ext", "title": "Two-Compartment Soma–Dendrite Extracellular Model", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Point neurons cannot generate V_e because KCL cancels net current at one point; spatially extended compartments with finite extracellular resistance R_e yield V_e = −R_e(C_s dV_s/dt + I_m), recovering −dV/dt on the upstroke.", "lectures": [{"id": "L13", "role": "primary"}], "formula": "V_e = −R_e · (C_s dV_s/dt + I_m)", "tags": ["model/equation", "biophysics", "math/physics"], "relatedIds": ["n_buzsaki_rec", "n_electroneutrality", "n_point_source_vc"]}, {"id": "n_debye_volcond", "title": "Debye Shielding, Tortuosity & Volume Conduction", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Microscopic 1/r electrostatics is screened in saline over a ~1 nm Debye length with ~1 ns Stokes relaxation and neuropil tortuosity, justifying a macroscopic continuous, electroneutral, purely ohmic volume conductor (σ_t).", "lectures": [{"id": "L15", "role": "primary"}], "formula": "λ_D ≈ 1 nm ;  τ_Stokes ≈ 1 ns ;  ohmic bulk σ_t", "tags": ["biophysics", "math/physics", "model/equation"], "relatedIds": ["n_coulomb_perm", "n_stokes_drag", "n_point_source_vc"]}, {"id": "n_point_source_vc", "title": "Point-Source Volume Conduction Equation", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Combining 3D Ohm's law (J = −σ_t ∇V_e) with spherical current spreading and linear superposition over all transmembrane compartmental currents yields the forward volume conduction formula.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L13", "role": "revisited"}], "formula": "V_e(r) = (1 / 4πσ_t) · Σ I_n / |r − r_n|", "tags": ["model/equation", "math/physics"], "relatedIds": ["n_csd_inverse", "n_lfp_biophysics", "n_spike_morph", "n_scalar_pot", "n_two_comp_ext", "n_debye_volcond"]}, {"id": "n_csd_inverse", "title": "Inverse Problem & Current Source Density (CSD)", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Continuous current sources/sinks relate to the spatial Laplacian (CSD ∝ −σ_t ∇²V_e); unlike the well-posed forward problem, inferring neural sources from LFP/EEG/MEG is an ill-posed inverse problem.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "CSD(r) ∝ −σ_t · ∇²V_e(r)", "tags": ["model/equation", "math/physics", "analysis"], "relatedIds": ["n_point_source_vc", "n_lfp_biophysics", "n_spike_clustering"]}, {"id": "n_multiscale_mod", "title": "Multiscale Recording Modalities (Patch to fMRI)", "level": 3, "pillar": "p6", "parentId": "c6_1", "summary": "Compares spatiotemporal resolution and invasiveness across patch clamp (µm, sub-ms), intracortical LFP/MUA, ECoG (~1000× EEG), scalp EEG (Hans Berger, δ–γ bands), MEG (SQUIDs), 2-photon, and BOLD fMRI (Logothetis).", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L2", "role": "revisited"}], "formula": "", "tags": ["experiment/tool", "biophysics", "history"], "relatedIds": ["n_stentrode_eeg", "n_helmholtz", "n_lfp_biophysics"]}, {"id": "n_spike_morph", "title": "Spatial, Spectral & Morphological Spike Determinants", "level": 3, "pillar": "p6", "parentId": "c6_2", "summary": "LFPy simulations show extracellular spikes flip polarity, broaden, and decay as ~1/r² to ~1/r³ with distance; pyramidal cells have larger >30 µV detection zones than interneurons, and 1 kHz benchmarks probe impedance.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L13", "role": "revisited"}], "formula": "Attenuation: ~1/r² (near) to ~1/r³ (far); 1 kHz impedance benchmark", "tags": ["biophysics", "analysis", "model/equation"], "relatedIds": ["n_point_source_vc", "n_rall_ball_stick", "n_feat_pca"]}, {"id": "n_active_myelin", "title": "Active Dendrites vs. Axonal Myelination", "level": 3, "pillar": "p6", "parentId": "c6_2", "summary": "Active dendritic channels barely alter extracellular AP waveforms (~few µV), whereas axonal myelination (oligodendrocytes + Nodes of Ranvier, saltatory conduction) strongly reshapes passing-axon waveforms and decay slopes.", "lectures": [{"id": "L15", "role": "primary"}], "formula": "", "tags": ["biophysics", "model/equation"], "relatedIds": ["n_cable_transient", "n_bac_firing"]}, {"id": "n_mua_scaling", "title": "Multi-Unit Activity (MUA) & Firing-Rate Scaling", "level": 3, "pillar": "p6", "parentId": "c6_2", "summary": "High-pass filtering (>100–500 Hz) isolates MUA reflecting local spiking output (~50–100 µm); ground-truth network simulations show MUA amplitude scales as a power law of population firing rate.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L12", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "MUA ∝ F^α  (1 < α < 4/3)", "tags": ["biophysics", "analysis", "model/equation"], "relatedIds": ["n_lfp_mua_decomp", "n_peak_detect"]}, {"id": "n_lfp_biophysics", "title": "LFP Biophysics, Polarity Ambiguity & Dipoles", "level": 3, "pillar": "p6", "parentId": "c6_2", "summary": "Low-pass (<100–500 Hz) LFP decays slower (~1/r²) and reflects synchronized synaptic inputs (plus slow currents/glia); distal excitation and proximal inhibition yield identical dipoles, approximated far-field by a dipole moment (EEG).", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L12", "role": "revisited"}], "formula": "Far-field LFP/EEG ≈ current dipole moment (~1/r² decay)", "tags": ["biophysics", "model/equation", "analysis"], "relatedIds": ["n_shunting_dend", "n_csd_inverse", "n_dbs_adbs", "n_point_source_vc", "n_multiscale_mod"]}, {"id": "n_lfp_mua_decomp", "title": "Spectral Decomposition: LFP vs. MUA", "level": 3, "pillar": "p6", "parentId": "c6_2", "summary": "Wideband extracellular signals (0–4 kHz) are routinely split by frequency filtering into slow population-input LFP (<80–200 Hz) and fast zero-mean spiking MUA (>100–500 Hz) for spike sorting.", "lectures": [{"id": "L12", "role": "primary"}, {"id": "L13", "role": "primary"}, {"id": "L15", "role": "revisited"}, {"id": "L16", "role": "revisited"}], "formula": "Raw → LPF (<100–200 Hz) = LFP ;  HPF (>100–500 Hz) = MUA", "tags": ["analysis", "biophysics"], "relatedIds": ["n_causal_filter", "n_epileptic_colab", "n_mua_scaling"]}, {"id": "n_probes_evol", "title": "Evolution of Neural Probes (Microwires to Neuropixels)", "level": 3, "pillar": "p6", "parentId": "c6_3", "summary": "Hardware progressed from single tungsten microwires and 4-wire tetrodes (triangulation) to passive Michigan/Utah silicon arrays (BrainGate) and active CMOS Neuropixels (~3,600 multiplexed sites).", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L2", "role": "revisited"}, {"id": "L13", "role": "revisited"}], "formula": "Microwire → Tetrode (4) → Michigan/Utah → Neuropixels (~3,600 CMOS)", "tags": ["experiment/tool", "application", "history"], "relatedIds": ["n_invasive_bmi", "n_spike_clustering"]}, {"id": "n_nyquist_quant", "title": "Shannon-Nyquist Sampling & Quantization", "level": 3, "pillar": "p6", "parentId": "c6_3", "summary": "Digitizing analog potentials requires sampling at f_s ≥ 2 f_max (20–25 kHz for spikes) to avoid aliasing, and quantizing amplitude into 2^b levels (12–24 bit) across the acquisition range.", "lectures": [{"id": "L15", "role": "primary"}, {"id": "L1", "role": "revisited"}], "formula": "f_s ≥ 2·f_max (20–25 kHz) ;  ΔV_quant = Range / 2^b", "tags": ["analysis", "experiment/tool", "math/physics"], "relatedIds": ["n_signal_dim", "n_peak_detect"]}, {"id": "n_causal_filter", "title": "Causal vs. Acausal (Zero-Phase) Filtering", "level": 3, "pillar": "p6", "parentId": "c6_3", "summary": "Causal high-pass filters introduce phase shifts that distort extracellular spike shapes (unavoidable in real-time BMIs), whereas offline forward-backward filtering (`filtfilt`) achieves zero phase distortion.", "lectures": [{"id": "L16", "role": "primary"}], "formula": "", "tags": ["analysis", "experiment/tool"], "relatedIds": ["n_lfp_mua_decomp", "n_invasive_bmi"]}, {"id": "n_ext_noise", "title": "Extracellular Background Noise & Non-Gaussianity", "level": 3, "pillar": "p6", "parentId": "c6_3", "summary": "Background noise blends amplifier/electronic, thermal/interface, and distant-neuron biological noise (>100 µm), making real recordings non-stationary and heavy-tailed (Taleb's Black Swan critique of AWGN).", "lectures": [{"id": "L16", "role": "primary"}, {"id": "L13", "role": "revisited"}], "formula": "", "tags": ["biophysics", "analysis"], "relatedIds": ["n_mad_noise", "n_pharma_ttx_tea"]}, {"id": "n_mad_noise", "title": "Robust Noise Estimation via MAD", "level": 3, "pillar": "p6", "parentId": "c6_3", "summary": "Because spikes inflate sample standard deviation with firing rate, the median-based Median Absolute Deviation (MAD) robustly estimates background σ to set reliable ±4σ or ±5σ detection thresholds.", "lectures": [{"id": "L16", "role": "primary"}], "formula": "σ̂ = median(|x − median(x)|) / 0.6745 ;  Threshold = ±4σ to ±5σ", "tags": ["analysis", "math/physics"], "relatedIds": ["n_ext_noise", "n_peak_detect", "n_epileptic_colab"]}, {"id": "n_peak_detect", "title": "Threshold-Crossing Detection & Refractory Dead-Time", "level": 3, "pillar": "p6", "parentId": "c6_4", "summary": "Scans digitized MUA with single/dual (±5σ) or decaying dynamic thresholds plus a refractory dead-time to avoid noise jitter double-triggers, then aligns peaks and extracts asymmetric waveform windows.", "lectures": [{"id": "L16", "role": "primary"}], "formula": "Window: ~2–5 ms pre + ~5–10 ms post (~250 samples at 25 kHz)", "tags": ["analysis", "model/equation"], "relatedIds": ["n_mad_noise", "n_refractory", "n_feat_pca", "n_mua_scaling", "n_nyquist_quant"]}, {"id": "n_feat_pca", "title": "Feature Extraction & Dimensionality Reduction (PCA)", "level": 3, "pillar": "p6", "parentId": "c6_4", "summary": "Compresses ~250D spike waveforms into low-dimensional spaces via amplitude/width features, FFT/wavelets, or orthogonal Principal Component Analysis (top 3 PCs capture ~94% variance; nonlinear UMAP/autoencoders).", "lectures": [{"id": "L16", "role": "primary"}], "formula": "250D waveform → top 3 PCs (~94% variance) for 2D/3D clustering", "tags": ["analysis", "math/physics"], "relatedIds": ["n_peak_detect", "n_spike_clustering", "n_spike_morph"]}, {"id": "n_spike_clustering", "title": "Unsupervised Clustering & Spike Sorting Limits", "level": 3, "pillar": "p6", "parentId": "c6_4", "summary": "Algorithms like k-means or superparamagnetic clustering isolate Single-Unit Activity (SUA), yet sorting remains an ill-posed inverse problem challenged by unknown k, burst waveform drift, and overlapping spikes (<5–10 ms).", "lectures": [{"id": "L16", "role": "primary"}, {"id": "L12", "role": "revisited"}], "formula": "", "tags": ["analysis", "model/equation"], "relatedIds": ["n_csd_inverse", "n_concept_cells", "n_probes_evol", "n_feat_pca"]}, {"id": "n_intra_protocols", "title": "Intracellular Stimulus-Response Protocols", "level": 3, "pillar": "p6", "parentId": "c6_4", "summary": "Active patch-clamp probing uses multi-step I–V pulses, ramps (rheobase), hyperpolarizing steps (I_h rebound fingerprint), frequency-swept chirps (gap junctions), and stochastic noise (ISI statistics).", "lectures": [{"id": "L16", "role": "primary"}], "formula": "", "tags": ["experiment/tool", "biophysics", "analysis"], "relatedIds": ["n_threshold_rheo", "n_rebound_ap", "n_chirp_phase", "n_channel_zoo"]}, {"id": "n_epileptic_colab", "title": "Human Epileptic Slice MEA & Intracellular Colab", "level": 3, "pillar": "p6", "parentId": "c6_4", "summary": "Hands-on Python/Colab analysis of real 20 kHz HDF5 MEA recordings from a 300 µm human epileptic slice (PSD, LFP/MUA filtering, MAD 5σ detection, synchronous population-wave rasters) plus rat L1 accommodating traces.", "lectures": [{"id": "L16", "role": "primary"}], "formula": "20 kHz × 7 s = 140,000 samples ;  LFP <100 Hz, MUA 100–3000 Hz", "tags": ["experiment/tool", "analysis", "application"], "relatedIds": ["n_lfp_mua_decomp", "n_mad_noise", "n_epilepsy_sync"]}]};
+
+(function () {
+  const nodeMap = new Map(DATA.nodes.map(n => [n.id, n]));
+  const pillarMap = new Map(DATA.pillars.map(p => [p.id, p]));
+  const lectureMap = new Map(DATA.lectures.map(l => [l.id, l]));
+  const childrenMap = new Map();
+  DATA.nodes.forEach(n => {
+    if (!childrenMap.has(n.id)) childrenMap.set(n.id, []);
+    if (n.parentId) {
+      if (!childrenMap.has(n.parentId)) childrenMap.set(n.parentId, []);
+      childrenMap.get(n.parentId).push(n);
+    }
+  });
+
+  // State — defaults to Overview (Level 2 clusters collapsed) & Cross-Links ON
+  let layoutMode = 'tree'; // 'tree' | 'radial'
+  let collapsed = new Set(DATA.nodes.filter(n => n.level === 2).map(n => n.id));
+  let selectedId = null;
+  let selectedLinkKey = null;
+  let hoveredNodeId = null;
+  let activeLectureId = '';
+  let showAllCrossLinks = true;
+  let posMap = new Map(); // id -> {x, y, side, angle, w, h}
+  let transform = { x: 0, y: 0, k: 0.78 };
+
+  // DOM refs
+  const svg = document.getElementById('mindmap');
+  const stage = document.getElementById('stage');
+  const viewport = document.getElementById('viewport');
+  const layerCross = document.getElementById('layer-cross');
+  const layerEdges = document.getElementById('layer-edges');
+  const layerNodes = document.getElementById('layer-nodes');
+  const drawer = document.getElementById('drawer');
+  const tooltip = document.getElementById('linkTooltip');
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  const searchResults = document.getElementById('searchResults');
+  const lectureFilter = document.getElementById('lectureFilter');
+  const filterBanner = document.getElementById('filterBanner');
+  const filterBannerText = document.getElementById('filterBannerText');
+  const btnOverview = document.getElementById('btnOverview');
+  const btnExpandAll = document.getElementById('btnExpandAll');
+
+  // Stats
+  const l3Count = DATA.nodes.filter(n => n.level === 3).length;
+  document.getElementById('courseTitle').textContent = DATA.course;
+  document.getElementById('courseStats').textContent =
+    `${DATA.lectures.length} classes · ${DATA.pillars.length} pillars · ${l3Count} topics`;
+
+  // Populate Lecture Filter
+  DATA.lectures.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.id;
+    opt.textContent = `${l.id}: ${l.title}`;
+    lectureFilter.appendChild(opt);
+  });
+
+  // Populate Pillar Legend
+  const legendEl = document.getElementById('pillarLegend');
+  DATA.pillars.forEach(p => {
+    const chip = document.createElement('span');
+    chip.className = 'legend-chip';
+    chip.innerHTML = `<span class="legend-dot" style="background:${p.color}"></span>${p.shortTitle}`;
+    chip.title = p.title;
+    chip.addEventListener('click', () => {
+      collapsed.delete(p.id);
+      syncDepthButtons();
+      render();
+      selectNode(p.id, true);
+    });
+    legendEl.appendChild(chip);
+  });
+
+  function syncDepthButtons() {
+    const l2Ids = DATA.nodes.filter(n => n.level === 2).map(n => n.id);
+    const allL2Collapsed = l2Ids.every(id => collapsed.has(id)) && !DATA.pillars.some(p => collapsed.has(p.id));
+    const allExpanded = collapsed.size === 0;
+    btnOverview.classList.toggle('active', allL2Collapsed);
+    btnExpandAll.classList.toggle('active', allExpanded);
+  }
+
+  function getColor(n) {
+    if (!n || n.level === 0) return '#0f172a';
+    const p = pillarMap.get(n.pillar);
+    return p ? p.color : '#4f46e5';
+  }
+
+  function visibleChildren(id) {
+    if (collapsed.has(id)) return [];
+    return childrenMap.get(id) || [];
+  }
+
+  // Nearest visible ancestor (or self if currently rendered)
+  function visibleRep(id) {
+    let cur = nodeMap.get(id);
+    while (cur) {
+      if (posMap.has(cur.id)) return cur.id;
+      cur = cur.parentId ? nodeMap.get(cur.parentId) : null;
+    }
+    return null;
+  }
+
+  function estimateBox(n) {
+    const charW = n.level === 0 ? 9.2 : n.level === 1 ? 7.6 : n.level === 2 ? 6.9 : 6.2;
+    const padX = n.level === 0 ? 34 : n.level === 1 ? 26 : n.level === 2 ? 22 : 18;
+    const h = n.level === 0 ? 48 : n.level === 1 ? 36 : n.level === 2 ? 30 : 25;
+    const w = Math.max(96, Math.min(340, Math.round(n.title.length * charW + padX)));
+    return { w, h };
+  }
+
+  // =========================================================================
+  // LAYOUT 1: Bilateral Horizontal Mind Map
+  // =========================================================================
+  function computeBilateralLayout() {
+    posMap.clear();
+    const root = nodeMap.get('root');
+    const rootBox = estimateBox(root);
+    posMap.set('root', { x: 0, y: 0, side: 0, ...rootBox });
+
+    const leftPillars = ['p1', 'p2', 'p3'].map(id => nodeMap.get(id)).filter(Boolean);
+    const rightPillars = ['p4', 'p5', 'p6'].map(id => nodeMap.get(id)).filter(Boolean);
+
+    const LEVEL_X = { 1: 270, 2: 600, 3: 940 };
+    const LEAF_GAP = 32;
+    const CLUSTER_GAP = 16;
+    const PILLAR_GAP = 28;
+
+    function subtreeHeight(n) {
+      const kids = visibleChildren(n.id);
+      if (kids.length === 0) return n.level === 2 ? 42 : LEAF_GAP;
+      let total = 0;
+      kids.forEach((k, idx) => {
+        total += subtreeHeight(k);
+        if (idx < kids.length - 1 && n.level === 1) total += CLUSTER_GAP;
+      });
+      return Math.max(LEAF_GAP, total);
+    }
+
+    function layoutSide(pillars, dir) {
+      const heights = pillars.map(p => subtreeHeight(p));
+      const totalH = heights.reduce((a, b) => a + b, 0) + PILLAR_GAP * Math.max(0, pillars.length - 1);
+      let cursorY = -totalH / 2;
+
+      function place(n, topY, spanH) {
+        const box = estimateBox(n);
+        const cy = topY + spanH / 2;
+        const cx = dir * LEVEL_X[n.level];
+        posMap.set(n.id, { x: cx, y: cy, side: dir, ...box });
+
+        const kids = visibleChildren(n.id);
+        if (!kids.length) return;
+        const gap = n.level === 1 ? CLUSTER_GAP : 0;
+        const kidHeights = kids.map(k => subtreeHeight(k));
+        const usedH = kidHeights.reduce((a, b) => a + b, 0) + gap * Math.max(0, kids.length - 1);
+        let y0 = cy - usedH / 2;
+        kids.forEach((k, i) => {
+          place(k, y0, kidHeights[i]);
+          y0 += kidHeights[i] + gap;
+        });
+      }
+
+      pillars.forEach((p, i) => {
+        place(p, cursorY, heights[i]);
+        cursorY += heights[i] + PILLAR_GAP;
+      });
+    }
+
+    layoutSide(leftPillars, -1);
+    layoutSide(rightPillars, 1);
+  }
+
+  // =========================================================================
+  // LAYOUT 2: 360° Radial Mind Map
+  // =========================================================================
+  function computeRadialLayout() {
+    posMap.clear();
+    const root = nodeMap.get('root');
+    const rootBox = estimateBox(root);
+    posMap.set('root', { x: 0, y: 0, side: 0, angle: 0, ...rootBox });
+
+    function leafCount(n) {
+      const kids = visibleChildren(n.id);
+      if (!kids.length) return 1;
+      return kids.reduce((s, k) => s + leafCount(k), 0);
+    }
+
+    const pillars = visibleChildren('root');
+    const totalLeaves = pillars.reduce((s, p) => s + leafCount(p), 0);
+    const hasL3 = Array.from(DATA.nodes).some(n => n.level === 2 && !collapsed.has(n.id));
+    const R = hasL3 ? { 1: 260, 2: 530, 3: 850 } : { 1: 230, 2: 470, 3: 740 };
+
+    let curAngle = -Math.PI / 2;
+    function placeRadial(n, aStart, aSpan) {
+      const mid = aStart + aSpan / 2;
+      const r = R[n.level];
+      const x = r * Math.cos(mid);
+      const y = r * Math.sin(mid);
+      const box = estimateBox(n);
+      const side = Math.cos(mid) >= 0 ? 1 : -1;
+      posMap.set(n.id, { x, y, side, angle: mid, ...box });
+
+      const kids = visibleChildren(n.id);
+      if (!kids.length) return;
+      const subLeaves = kids.reduce((s, k) => s + leafCount(k), 0);
+      let a = aStart;
+      kids.forEach(k => {
+        const span = aSpan * (leafCount(k) / subLeaves);
+        placeRadial(k, a, span);
+        a += span;
+      });
+    }
+
+    pillars.forEach(p => {
+      const span = (2 * Math.PI) * (leafCount(p) / Math.max(1, totalLeaves));
+      placeRadial(p, curAngle, span);
+      curAngle += span;
+    });
+  }
+
+  function svgEl(tag, attrs = {}) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  function nodeMatchesLecture(n, lecId) {
+    if (!lecId) return true;
+    if (n.level === 0) return true;
+    return n.lectures && n.lectures.some(x => x.id === lecId);
+  }
+
+  function getHighlightedIds() {
+    if (!activeLectureId) return null;
+    const set = new Set(['root']);
+    DATA.nodes.forEach(n => {
+      if (n.level > 0 && nodeMatchesLecture(n, activeLectureId)) {
+        let cur = n;
+        while (cur) {
+          set.add(cur.id);
+          cur = cur.parentId ? nodeMap.get(cur.parentId) : null;
+        }
+      }
+    });
+    return set;
+  }
+
+  // Build visible cross-links (aggregating collapsed children up to visible clusters/pillars!)
+  function collectVisibleCrossLinks() {
+    const agg = new Map(); // "idA--idB" -> { a, b, pairs: [{src, dst}] }
+    const seenRaw = new Set();
+
+    DATA.nodes.forEach(src => {
+      if (!src.relatedIds || !src.relatedIds.length) return;
+      src.relatedIds.forEach(dstId => {
+        const rawKey = [src.id, dstId].sort().join('||');
+        if (seenRaw.has(rawKey)) return;
+        seenRaw.add(rawKey);
+
+        const repA = visibleRep(src.id);
+        const repB = visibleRep(dstId);
+        if (!repA || !repB || repA === repB || repA === 'root' || repB === 'root') return;
+        // Skip trivial parent/child links
+        const nA = nodeMap.get(repA), nB = nodeMap.get(repB);
+        if (nA.parentId === repB || nB.parentId === repA) return;
+
+        const key = [repA, repB].sort().join('--');
+        if (!agg.has(key)) agg.set(key, { key, a: repA, b: repB, pairs: [] });
+        agg.get(key).pairs.push({ src: src.id, dst: dstId });
+      });
+    });
+
+    return Array.from(agg.values());
+  }
+
+  function showTooltip(e, html) {
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    moveTooltip(e);
+  }
+  function moveTooltip(e) {
+    const pad = 14;
+    let x = e.clientX + pad;
+    let y = e.clientY + pad;
+    const r = tooltip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 10) x = e.clientX - r.width - pad;
+    if (y + r.height > window.innerHeight - 10) y = e.clientY - r.height - pad;
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+  }
+  function hideTooltip() {
+    tooltip.style.display = 'none';
+  }
+
+  function highlightEndpoints(idA, idB, on) {
+    [idA, idB].forEach(id => {
+      const el = layerNodes.querySelector(`[data-id="${id}"]`);
+      if (el) el.classList.toggle('link-endpoint', on);
+    });
+  }
+
+  function updateCrossLinkFocus() {
+    const focusId = hoveredNodeId || selectedId;
+    layerCross.querySelectorAll('.cross-group').forEach(g => {
+      const a = g.getAttribute('data-a');
+      const b = g.getAttribute('data-b');
+      const key = g.getAttribute('data-key');
+      const isFocused = (selectedLinkKey && key === selectedLinkKey) || (focusId && (a === focusId || b === focusId));
+      g.classList.toggle('highlighted', !!isFocused);
+      g.classList.toggle('dimmed', !!(focusId && !isFocused && showAllCrossLinks));
+      if (!showAllCrossLinks) {
+        g.style.display = isFocused ? '' : 'none';
+      } else {
+        g.style.display = '';
+      }
+    });
+  }
+
+  function render() {
+    if (layoutMode === 'tree') computeBilateralLayout();
+    else computeRadialLayout();
+
+    layerCross.innerHTML = '';
+    layerEdges.innerHTML = '';
+    layerNodes.innerHTML = '';
+
+    const hiSet = getHighlightedIds();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    // 1. Hierarchical Edges
+    posMap.forEach((pos, id) => {
+      const n = nodeMap.get(id);
+      if (!n.parentId || !posMap.has(n.parentId)) return;
+      const pPos = posMap.get(n.parentId);
+      const color = getColor(n);
+      const strokeW = n.level === 1 ? 3.2 : n.level === 2 ? 2.1 : 1.35;
+
+      let d;
+      if (layoutMode === 'tree') {
+        const dir = pos.side;
+        const x1 = pPos.x + dir * (pPos.w / 2);
+        const y1 = pPos.y;
+        const x2 = pos.x - dir * (pos.w / 2);
+        const y2 = pos.y;
+        const mx = (x1 + x2) / 2;
+        d = `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+      } else {
+        const mx = (pPos.x + pos.x) * 0.45;
+        const my = (pPos.y + pos.y) * 0.45;
+        d = `M ${pPos.x} ${pPos.y} Q ${mx} ${my}, ${pos.x} ${pos.y}`;
+      }
+
+      const dimmed = hiSet && (!hiSet.has(id) || !hiSet.has(n.parentId));
+      layerEdges.appendChild(svgEl('path', {
+        d,
+        class: 'edge' + (dimmed ? ' dimmed' : ''),
+        stroke: color,
+        'stroke-width': strokeW,
+        'stroke-opacity': n.level === 3 ? '0.45' : '0.72',
+      }));
+    });
+
+    // 2. Interactive Cross-Links (visible in BOTH Overview and Expanded modes!)
+    const crossLinks = collectVisibleCrossLinks();
+    crossLinks.forEach(link => {
+      const p1 = posMap.get(link.a);
+      const p2 = posMap.get(link.b);
+      if (!p1 || !p2) return;
+      const nA = nodeMap.get(link.a);
+      const nB = nodeMap.get(link.b);
+
+      // Compute graceful curve that bows gently away from center / straight chord
+      let cx, cy;
+      if (layoutMode === 'tree') {
+        const sameSide = p1.side === p2.side;
+        if (sameSide) {
+          const bow = p1.side * (85 + Math.min(180, Math.abs(p1.y - p2.y) * 0.28));
+          cx = (p1.x + p2.x) / 2 + bow;
+          cy = (p1.y + p2.y) / 2;
+        } else {
+          // Crosses left <-> right: gentle vertical arc around root
+          cx = (p1.x + p2.x) / 2;
+          cy = (p1.y + p2.y) / 2 + ((p1.y + p2.y) >= 0 ? 75 : -75);
+        }
+      } else {
+        cx = (p1.x + p2.x) * 0.25;
+        cy = (p1.y + p2.y) * 0.25;
+      }
+
+      const d = `M ${p1.x} ${p1.y} Q ${cx} ${cy}, ${p2.x} ${p2.y}`;
+      const baseColor = getColor(nA);
+      const count = link.pairs.length;
+      const baseW = Math.min(2.8, 1.35 + Math.log2(count) * 0.55);
+      const baseOp = isDark ? 0.42 : 0.36;
+
+      const cg = svgEl('g', {
+        class: 'cross-group',
+        'data-a': link.a,
+        'data-b': link.b,
+        'data-key': link.key,
+      });
+
+      // Invisible wide hit target for easy mouse clicking/hovering
+      const hit = svgEl('path', { d, class: 'cross-hit' });
+      const vis = svgEl('path', {
+        d,
+        class: 'cross-edge',
+        stroke: baseColor,
+        'stroke-width': baseW,
+        'stroke-opacity': baseOp,
+      });
+      cg.appendChild(vis);
+      cg.appendChild(hit);
+
+      // Midpoint count pill when aggregated (count > 1) in Overview
+      if (count > 1 && (nA.level < 3 || nB.level < 3)) {
+        const mx = 0.25 * p1.x + 0.5 * cx + 0.25 * p2.x;
+        const my = 0.25 * p1.y + 0.5 * cy + 0.25 * p2.y;
+        const bg = svgEl('g', { class: 'cross-badge', transform: `translate(${mx}, ${my})` });
+        bg.appendChild(svgEl('circle', {
+          r: 8.5,
+          fill: isDark ? '#1e293b' : '#ffffff',
+          stroke: baseColor,
+          'stroke-width': 1.2,
+          'fill-opacity': 0.92,
+        }));
+        const bt = svgEl('text', {
+          x: 0, y: 0.5, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+          fill: baseColor, 'font-size': 9.5, 'font-weight': '700',
+        });
+        bt.textContent = count;
+        bg.appendChild(bt);
+        cg.appendChild(bg);
+      }
+
+      // Mouse interaction on link
+      cg.addEventListener('mouseenter', (e) => {
+        cg.classList.add('highlighted');
+        highlightEndpoints(link.a, link.b, true);
+        const preview = link.pairs.slice(0, 3).map(pr =>
+          `${nodeMap.get(pr.src).title} ↔ ${nodeMap.get(pr.dst).title}`
+        ).join('<br>');
+        const more = count > 3 ? `<br><em>+${count - 3} more — click to inspect</em>` : '<br><em>Click link to inspect & jump</em>';
+        showTooltip(e, `
+          <div class="link-tooltip-title">
+            <span class="legend-dot" style="background:${getColor(nA)}"></span>
+            <span>${nA.title}</span>
+            <span>↔</span>
+            <span class="legend-dot" style="background:${getColor(nB)}"></span>
+            <span>${nB.title}</span>
+          </div>
+          <div class="link-tooltip-sub">${count === 1 ? 'Conceptual link — click to inspect' : `${count} linked concepts:<br>${preview}${more}`}</div>
+        `);
+      });
+      cg.addEventListener('mousemove', moveTooltip);
+      cg.addEventListener('mouseleave', () => {
+        highlightEndpoints(link.a, link.b, false);
+        hideTooltip();
+        updateCrossLinkFocus();
+      });
+      cg.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideTooltip();
+        inspectCrossLink(link);
+      });
+
+      layerCross.appendChild(cg);
+    });
+
+    // 3. Nodes
+    posMap.forEach((pos, id) => {
+      const n = nodeMap.get(id);
+      const color = getColor(n);
+      const kids = childrenMap.get(id) || [];
+      const hasKids = kids.length > 0;
+      const isCollapsed = collapsed.has(id);
+      const isSelected = id === selectedId;
+      const dimmed = hiSet && !hiSet.has(id);
+
+      const g = svgEl('g', {
+        class: `node-group${isSelected ? ' selected' : ''}${dimmed ? ' dimmed' : ''}`,
+        transform: `translate(${pos.x}, ${pos.y})`,
+        'data-id': id,
+      });
+
+      const rx = n.level === 0 ? 14 : n.level === 1 ? 10 : n.level === 2 ? 8 : 6;
+      let fill, stroke, textColor, strokeW;
+
+      if (n.level === 0) {
+        fill = isDark ? '#f8fafc' : '#0f172a';
+        stroke = fill;
+        textColor = isDark ? '#0f172a' : '#ffffff';
+        strokeW = 2;
+      } else if (n.level === 1) {
+        fill = color;
+        stroke = color;
+        textColor = '#ffffff';
+        strokeW = 1.5;
+      } else if (n.level === 2) {
+        fill = isDark ? '#1e293b' : '#ffffff';
+        stroke = color;
+        textColor = isDark ? '#f8fafc' : '#0f172a';
+        strokeW = 1.9;
+      } else {
+        fill = isDark ? '#172033' : '#ffffff';
+        stroke = isSelected ? color : (isDark ? '#334155' : '#cbd5e1');
+        textColor = isDark ? '#e2e8f0' : '#1e293b';
+        strokeW = isSelected ? 2.4 : 1.1;
+      }
+
+      g.appendChild(svgEl('rect', {
+        class: 'node-box',
+        x: -pos.w / 2, y: -pos.h / 2, width: pos.w, height: pos.h,
+        rx, fill, stroke, 'stroke-width': strokeW,
+      }));
+
+      if (n.level === 3) {
+        g.appendChild(svgEl('rect', {
+          x: -pos.w / 2, y: -pos.h / 2, width: 4.5, height: pos.h, rx: 2, fill: color,
+        }));
+      }
+
+      const fontSize = n.level === 0 ? 14.5 : n.level === 1 ? 12.5 : n.level === 2 ? 11.5 : 10.5;
+      const fontWeight = n.level <= 1 ? '700' : n.level === 2 ? '650' : '500';
+      const label = svgEl('text', {
+        class: 'node-label',
+        x: n.level === 3 ? 2 : 0, y: 0,
+        'text-anchor': 'middle', 'dominant-baseline': 'central',
+        fill: textColor, 'font-size': fontSize, 'font-weight': fontWeight,
+      });
+      label.textContent = n.title;
+      g.appendChild(label);
+
+      // Expand/Collapse badge showing child count when collapsed
+      if (hasKids && n.level > 0) {
+        const dir = pos.side || 1;
+        const bx = layoutMode === 'tree' ? dir * (pos.w / 2 + 12) : Math.cos(pos.angle) * (pos.w / 2 + 11);
+        const by = layoutMode === 'tree' ? 0 : Math.sin(pos.angle) * (pos.h / 2 + 11);
+        const tg = svgEl('g', { class: 'toggle-btn', transform: `translate(${bx}, ${by})` });
+        tg.appendChild(svgEl('circle', {
+          r: isCollapsed ? 10 : 8,
+          fill: isCollapsed ? color : (isDark ? '#0f172a' : '#ffffff'),
+          stroke: color,
+          'stroke-width': 1.5,
+        }));
+        const txt = svgEl('text', {
+          x: 0, y: 0.5, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+          fill: isCollapsed ? '#ffffff' : color,
+          'font-size': isCollapsed ? 9.5 : 11, 'font-weight': '700', 'pointer-events': 'none',
+        });
+        txt.textContent = isCollapsed ? `+${kids.length}` : '−';
+        tg.appendChild(txt);
+        tg.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (collapsed.has(id)) collapsed.delete(id);
+          else collapsed.add(id);
+          syncDepthButtons();
+          render();
+        });
+        g.appendChild(tg);
+      }
+
+      g.addEventListener('mouseenter', () => {
+        hoveredNodeId = id;
+        updateCrossLinkFocus();
+      });
+      g.addEventListener('mouseleave', () => {
+        hoveredNodeId = null;
+        updateCrossLinkFocus();
+      });
+      g.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectNode(id, false);
+      });
+      g.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        if (hasKids && n.level > 0) {
+          if (collapsed.has(id)) collapsed.delete(id);
+          else collapsed.add(id);
+          syncDepthButtons();
+          render();
+        }
+      });
+
+      layerNodes.appendChild(g);
+    });
+
+    updateCrossLinkFocus();
+    applyTransform();
+  }
+
+  function inspectCrossLink(link) {
+    selectedId = null;
+    selectedLinkKey = link.key;
+    const nA = nodeMap.get(link.a);
+    const nB = nodeMap.get(link.b);
+
+    const bcEl = document.getElementById('drawerBreadcrumb');
+    bcEl.innerHTML = '<span>Conceptual Cross-Link</span>';
+
+    document.getElementById('drawerTitle').textContent = `${nA.title} ↔ ${nB.title}`;
+    document.getElementById('drawerTitle').style.color = '';
+    document.getElementById('drawerSummary').textContent =
+      link.pairs.length === 1
+        ? `Direct conceptual connection between these two topics across the course. Click either topic below to inspect its summary and lecture reference.`
+        : `${link.pairs.length} fine-grained concepts link "${nA.title}" and "${nB.title}". Click any concept below to expand its branch and inspect it.`;
+
+    document.getElementById('drawerFormulaWrap').style.display = 'none';
+    document.getElementById('drawerLecturesWrap').style.display = 'none';
+    document.getElementById('drawerRelatedWrap').style.display = 'none';
+    document.getElementById('drawerChildrenWrap').style.display = 'none';
+    document.getElementById('drawerTagsWrap').style.display = 'none';
+
+    const pairsWrap = document.getElementById('drawerPairsWrap');
+    const pairsEl = document.getElementById('drawerPairs');
+    pairsWrap.style.display = 'block';
+    pairsEl.innerHTML = '';
+
+    link.pairs.forEach(pr => {
+      const s = nodeMap.get(pr.src);
+      const d = nodeMap.get(pr.dst);
+      const card = document.createElement('div');
+      card.className = 'pair-card';
+      card.innerHTML = `
+        <div class="pair-row">
+          <button class="pair-btn" data-jump="${s.id}"><span class="legend-dot" style="background:${getColor(s)}"></span>${s.title}</button>
+          <span style="color:var(--text-subtle)">↔</span>
+          <button class="pair-btn" data-jump="${d.id}"><span class="legend-dot" style="background:${getColor(d)}"></span>${d.title}</button>
+        </div>
+      `;
+      card.querySelectorAll('[data-jump]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectNode(btn.getAttribute('data-jump'), true);
+        });
+      });
+      pairsEl.appendChild(card);
+    });
+
+    drawer.classList.add('open');
+    updateCrossLinkFocus();
+  }
+
+  function applyTransform() {
+    viewport.setAttribute('transform', `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
+  }
+
+  function fitToScreen() {
+    if (!posMap.size) return;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    posMap.forEach(p => {
+      minX = Math.min(minX, p.x - p.w / 2 - 40);
+      maxX = Math.max(maxX, p.x + p.w / 2 + 40);
+      minY = Math.min(minY, p.y - p.h / 2 - 40);
+      maxY = Math.max(maxY, p.y + p.h / 2 + 40);
+    });
+    const rect = stage.getBoundingClientRect();
+    const drawerOffset = drawer.classList.contains('open') ? 190 : 0;
+    const availW = Math.max(300, rect.width - drawerOffset - 40);
+    const availH = Math.max(300, rect.height - 70);
+    const k = Math.min(1.15, Math.min(availW / (maxX - minX), availH / (maxY - minY)));
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    transform.k = k;
+    transform.x = (rect.width - drawerOffset) / 2 - cx * k;
+    transform.y = rect.height / 2 - cy * k;
+    applyTransform();
+  }
+
+  function centerOnNode(id) {
+    let cur = nodeMap.get(id);
+    let changed = false;
+    while (cur && cur.parentId) {
+      if (collapsed.has(cur.parentId)) {
+        collapsed.delete(cur.parentId);
+        changed = true;
+      }
+      cur = nodeMap.get(cur.parentId);
+    }
+    if (changed) { syncDepthButtons(); render(); }
+    const p = posMap.get(id);
+    if (!p) return;
+    const rect = stage.getBoundingClientRect();
+    const drawerW = drawer.classList.contains('open') ? 390 : 0;
+    const targetK = Math.max(transform.k, 0.88);
+    transform.k = targetK;
+    transform.x = (rect.width - drawerW) / 2 - p.x * targetK;
+    transform.y = rect.height / 2 - p.y * targetK;
+    applyTransform();
+  }
+
+  function selectNode(id, shouldCenter = false) {
+    selectedId = id;
+    selectedLinkKey = null;
+    const n = nodeMap.get(id);
+    if (!n) return;
+
+    document.getElementById('drawerPairsWrap').style.display = 'none';
+    document.getElementById('drawerLecturesWrap').style.display = 'block';
+
+    // Breadcrumb
+    const crumbs = [];
+    let cur = n;
+    while (cur) {
+      crumbs.unshift(cur);
+      cur = cur.parentId ? nodeMap.get(cur.parentId) : null;
+    }
+    const bcEl = document.getElementById('drawerBreadcrumb');
+    bcEl.innerHTML = '';
+    crumbs.forEach((c, idx) => {
+      const sp = document.createElement('span');
+      sp.className = 'crumb-link';
+      sp.textContent = c.level === 0 ? 'Course' : c.title;
+      sp.addEventListener('click', () => selectNode(c.id, true));
+      bcEl.appendChild(sp);
+      if (idx < crumbs.length - 1) {
+        const sep = document.createElement('span');
+        sep.textContent = '›';
+        bcEl.appendChild(sep);
+      }
+    });
+
+    document.getElementById('drawerTitle').textContent = n.title;
+    document.getElementById('drawerTitle').style.color = n.level === 1 ? getColor(n) : '';
+    document.getElementById('drawerSummary').textContent = n.summary;
+
+    // Formula
+    const fWrap = document.getElementById('drawerFormulaWrap');
+    const fBox = document.getElementById('drawerFormula');
+    if (n.formula) {
+      fWrap.style.display = 'block';
+      fBox.textContent = n.formula;
+      fBox.style.borderLeftColor = getColor(n);
+    } else {
+      fWrap.style.display = 'none';
+    }
+
+    // Lectures (Title only, no dates!)
+    const lecEl = document.getElementById('drawerLectures');
+    lecEl.innerHTML = '';
+    (n.lectures || []).forEach(lr => {
+      const lec = lectureMap.get(lr.id);
+      if (!lec) return;
+      const card = document.createElement('div');
+      card.className = 'lecture-card';
+      card.title = 'Click to highlight all topics from this class';
+      card.innerHTML = `
+        <div class="lecture-card-top">
+          <span class="lecture-badge">Class ${lec.number} (${lec.id})</span>
+          <span class="role-pill ${lr.role}">${lr.role === 'primary' ? 'Primary' : 'Revisited'}</span>
+        </div>
+        <div class="lecture-title-text">${lec.title}</div>
+      `;
+      card.addEventListener('click', () => setLectureFilter(lec.id));
+      lecEl.appendChild(card);
+    });
+
+    // Related Cross-Links
+    const relWrap = document.getElementById('drawerRelatedWrap');
+    const relEl = document.getElementById('drawerRelated');
+    relEl.innerHTML = '';
+    if (n.relatedIds && n.relatedIds.length) {
+      relWrap.style.display = 'block';
+      n.relatedIds.forEach(rid => {
+        const rn = nodeMap.get(rid);
+        if (!rn) return;
+        const ch = document.createElement('span');
+        ch.className = 'chip';
+        ch.innerHTML = `<span class="legend-dot" style="background:${getColor(rn)}"></span>${rn.title}`;
+        ch.addEventListener('click', () => selectNode(rid, true));
+        relEl.appendChild(ch);
+      });
+    } else {
+      relWrap.style.display = 'none';
+    }
+
+    // Subtopics (for L0/L1/L2)
+    const chWrap = document.getElementById('drawerChildrenWrap');
+    const chEl = document.getElementById('drawerChildren');
+    chEl.innerHTML = '';
+    const kids = childrenMap.get(id) || [];
+    if (kids.length) {
+      chWrap.style.display = 'block';
+      kids.forEach(k => {
+        const ch = document.createElement('span');
+        ch.className = 'chip';
+        ch.innerHTML = `<span class="legend-dot" style="background:${getColor(k)}"></span>${k.title}`;
+        ch.addEventListener('click', () => selectNode(k.id, true));
+        chEl.appendChild(ch);
+      });
+    } else {
+      chWrap.style.display = 'none';
+    }
+
+    // Tags
+    const tWrap = document.getElementById('drawerTagsWrap');
+    const tEl = document.getElementById('drawerTags');
+    tEl.innerHTML = '';
+    if (n.tags && n.tags.length) {
+      tWrap.style.display = 'block';
+      n.tags.forEach(t => {
+        const sp = document.createElement('span');
+        sp.className = 'tag-pill';
+        sp.textContent = t;
+        tEl.appendChild(sp);
+      });
+    } else {
+      tWrap.style.display = 'none';
+    }
+
+    drawer.classList.add('open');
+    render();
+    if (shouldCenter) centerOnNode(id);
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    selectedId = null;
+    selectedLinkKey = null;
+    render();
+  }
+
+  function setLectureFilter(lecId) {
+    activeLectureId = lecId || '';
+    lectureFilter.value = activeLectureId;
+    if (activeLectureId) {
+      const lec = lectureMap.get(activeLectureId);
+      collapsed.clear();
+      syncDepthButtons();
+      filterBannerText.textContent = `Highlighting ${lec.id}: ${lec.title}`;
+      filterBanner.style.display = 'inline-flex';
+    } else {
+      filterBanner.style.display = 'none';
+    }
+    render();
+    fitToScreen();
+  }
+
+  // Pan & Zoom
+  let isDragging = false, dragStart = { x: 0, y: 0 };
+  stage.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.node-group') || e.target.closest('.cross-group')) return;
+    isDragging = true;
+    stage.classList.add('dragging');
+    dragStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    transform.x = e.clientX - dragStart.x;
+    transform.y = e.clientY - dragStart.y;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    stage.classList.remove('dragging');
+  });
+  stage.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = stage.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.12 : 0.89;
+    const nextK = Math.max(0.22, Math.min(2.6, transform.k * factor));
+    const ratio = nextK / transform.k;
+    transform.x = mx - (mx - transform.x) * ratio;
+    transform.y = my - (my - transform.y) * ratio;
+    transform.k = nextK;
+    applyTransform();
+  }, { passive: false });
+
+  svg.addEventListener('click', (e) => {
+    if (e.target === svg) closeDrawer();
+  });
+
+  // Search
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    searchClear.style.display = q ? 'block' : 'none';
+    if (!q) { searchResults.style.display = 'none'; return; }
+    const hits = DATA.nodes.filter(n =>
+      n.title.toLowerCase().includes(q) ||
+      n.summary.toLowerCase().includes(q) ||
+      (n.formula && n.formula.toLowerCase().includes(q)) ||
+      (n.tags && n.tags.some(t => t.toLowerCase().includes(q)))
+    ).slice(0, 14);
+
+    searchResults.innerHTML = '';
+    if (!hits.length) {
+      searchResults.innerHTML = `<div class="search-item"><span class="search-item-sub">No matching topics found.</span></div>`;
+    } else {
+      hits.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'search-item';
+        div.innerHTML = `
+          <div class="search-item-title">
+            <span class="search-item-dot" style="background:${getColor(h)}"></span>
+            <span>${h.title}</span>
+          </div>
+          <div class="search-item-sub">${h.summary}</div>
+        `;
+        div.addEventListener('click', () => {
+          searchResults.style.display = 'none';
+          selectNode(h.id, true);
+        });
+        searchResults.appendChild(div);
+      });
+    }
+    searchResults.style.display = 'block';
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClear.style.display = 'none';
+    searchResults.style.display = 'none';
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) searchResults.style.display = 'none';
+  });
+
+  // Toolbar buttons
+  lectureFilter.addEventListener('change', () => setLectureFilter(lectureFilter.value));
+  document.getElementById('filterBannerClear').addEventListener('click', () => setLectureFilter(''));
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+
+  document.getElementById('btnLayoutTree').addEventListener('click', () => {
+    layoutMode = 'tree';
+    document.getElementById('btnLayoutTree').classList.add('active');
+    document.getElementById('btnLayoutRadial').classList.remove('active');
+    render(); fitToScreen();
+  });
+  document.getElementById('btnLayoutRadial').addEventListener('click', () => {
+    layoutMode = 'radial';
+    document.getElementById('btnLayoutRadial').classList.add('active');
+    document.getElementById('btnLayoutTree').classList.remove('active');
+    render(); fitToScreen();
+  });
+
+  btnExpandAll.addEventListener('click', () => {
+    collapsed.clear(); syncDepthButtons(); render(); fitToScreen();
+  });
+  btnOverview.addEventListener('click', () => {
+    collapsed.clear();
+    DATA.nodes.filter(n => n.level === 2).forEach(n => collapsed.add(n.id));
+    syncDepthButtons(); render(); fitToScreen();
+  });
+  document.getElementById('btnCrossLinks').addEventListener('click', (e) => {
+    showAllCrossLinks = !showAllCrossLinks;
+    e.currentTarget.classList.toggle('active', showAllCrossLinks);
+    updateCrossLinkFocus();
+  });
+
+  document.getElementById('btnZoomIn').addEventListener('click', () => {
+    const r = stage.getBoundingClientRect();
+    const cx = r.width / 2, cy = r.height / 2;
+    const nk = Math.min(2.6, transform.k * 1.2);
+    transform.x = cx - (cx - transform.x) * (nk / transform.k);
+    transform.y = cy - (cy - transform.y) * (nk / transform.k);
+    transform.k = nk; applyTransform();
+  });
+  document.getElementById('btnZoomOut').addEventListener('click', () => {
+    const r = stage.getBoundingClientRect();
+    const cx = r.width / 2, cy = r.height / 2;
+    const nk = Math.max(0.22, transform.k / 1.2);
+    transform.x = cx - (cx - transform.x) * (nk / transform.k);
+    transform.y = cy - (cy - transform.y) * (nk / transform.k);
+    transform.k = nk; applyTransform();
+  });
+  document.getElementById('btnFit').addEventListener('click', fitToScreen);
+
+  document.getElementById('btnTheme').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    render();
+  });
+
+  // Export SVG
+  document.getElementById('btnExportSVG').addEventListener('click', () => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    posMap.forEach(p => {
+      minX = Math.min(minX, p.x - p.w / 2 - 40);
+      maxX = Math.max(maxX, p.x + p.w / 2 + 40);
+      minY = Math.min(minY, p.y - p.h / 2 - 40);
+      maxY = Math.max(maxY, p.y + p.h / 2 + 40);
+    });
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('viewBox', `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+    clone.setAttribute('width', Math.round(maxX - minX));
+    clone.setAttribute('height', Math.round(maxY - minY));
+    clone.querySelector('#viewport').removeAttribute('transform');
+    const bg = svgEl('rect', {
+      x: minX, y: minY, width: maxX - minX, height: maxY - minY,
+      fill: document.documentElement.getAttribute('data-theme') === 'dark' ? '#0f172a' : '#f8fafc'
+    });
+    clone.insertBefore(bg, clone.firstChild);
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'segnali_elettrofisiologici_mindmap.svg';
+    a.click();
+  });
+
+  // Export Markdown Outline
+  document.getElementById('btnExportMD').addEventListener('click', () => {
+    const lines = [`# ${DATA.course}`, ''];
+    DATA.pillars.forEach(p => {
+      lines.push(`## ${p.title}`);
+      (childrenMap.get(p.id) || []).forEach(c => {
+        lines.push(`### ${c.title}`);
+        (childrenMap.get(c.id) || []).forEach(leaf => {
+          const lecs = (leaf.lectures || []).map(x => `${x.id}: ${lectureMap.get(x.id).title}`).join('; ');
+          lines.push(`- **${leaf.title}** — ${leaf.summary} *(${lecs})*`);
+        });
+        lines.push('');
+      });
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'segnali_elettrofisiologici_outline.md';
+    a.click();
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault(); searchInput.focus();
+    } else if (e.key === 'Escape') {
+      searchResults.style.display = 'none';
+      if (document.activeElement === searchInput) searchInput.blur();
+      else closeDrawer();
+    }
+  });
+
+  // Initial render (Overview mode + Cross-Links visible)
+  syncDepthButtons();
+  render();
+  fitToScreen();
+})();
+</script>
+</body>
+</html>
